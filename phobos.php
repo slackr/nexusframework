@@ -101,6 +101,9 @@ class Phobos extends Nexus {
 		$this->massdeop_victims = array();
 		$this->seen_list = array();
 		
+		// to make sure the bot does not flood out with too many attempts to regain ops on the same channel
+		$this->regain_ops_completed = array();
+		
 		$this->userflags = 'aohvcjpn';
 		$this->default_config = 'phobos.conf';
 		$this->version_reply = 'phobos 1.0 (nexus)';
@@ -326,7 +329,10 @@ class Phobos extends Nexus {
 				}
 		}
 		if ($this->me != $nick && $this->me != $knick) {
-			if (sizeof($this->chans[$chan]) == 1 && !$this->isop($this->me,$chan)) { $this->send("part $chan\r\njoin $chan"); }
+			if (sizeof($this->chans[$chan]) == 1 && !$this->regain_ops_completed[$chan] && !$this->isop($this->me,$chan)) { 
+				$this->send("part $chan\r\njoin $chan"); 
+				$this->regain_ops_completed[$chan] = true;
+			}
 		}				
 		if ($this->me != $nick) {
 			$this->seen_update_record($nick,$host,"getting kicked from $chan by $nick ($reason)");
@@ -577,6 +583,7 @@ class Phobos extends Nexus {
 	protected function seen_update_record($item,$action) {
 		$this->seen_list[$item]['time'] = time();
 		$this->seen_list[$item]['action'] = $action;
+		$this->disp_msg("added seen record: $item $action");
 	}
 }
 
