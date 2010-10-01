@@ -17,8 +17,8 @@
  * 
  *   
  * version: 			1.03
- * last modified:		09/07/08
- * author:				blindk
+ * last modified:		10/01/10
+ * author:				adrianp
  * 
  */
 
