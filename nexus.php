@@ -16,7 +16,7 @@
  * 
  * 
  *   
- * version: 			1.02
+ * version: 			1.03
  * last modified:		09/07/08
  * author:				blindk
  * 
@@ -24,7 +24,7 @@
 
 abstract class Nexus {
 
-	protected static $framework_version = '1.02';
+	protected static $framework_version = '1.03';
 	protected $version_reply;	
 
 	private $sock;

@@ -104,16 +104,56 @@ class Phobos extends Nexus {
 		$this->userflags = 'aohvcjpn';
 		$this->default_config = 'phobos.conf';
 		$this->version_reply = 'phobos 1.0 (nexus)';
+
+		/* spawn timer to save seen file
+		 */
+		if ($this->client['save_data']) { $this->timer('save_seen_file','write_seenfile()',$this->client['save_data']*60,true); }
+
 	}
 	
 	/* trying to save the notify file before unloading the program
 	 */
-	protected function on_unload() {	
+	protected function on_unload() {
+		$this->write_seenfile();
 	}
 
+	/* write seen file from memory to disk
+	 * 
+	 * @return bool
+	 */
+	protected function write_seenfile() {
+		if ($this->client['seen'] == 1) {
+			$this->disp_msg("writing seen file... ","wrt",$nonl = true);
+			
+			$seenfile = $this->client['data_dir'].$this->client['seen_file'];
+			if (!$fp = @fopen($seenfile,"w")) {
+				$this->disp_error("error! (file: ".$seenfile.")","wrt");
+				return false;
+			}
+			$line = ""; $count = 0; $skipped = 0;
+			foreach ($this->seen_list as $key => $val) {
+				if ((time() - $this->gettok($data,2)) > 13515200) {
+					$line .= $key." ".$val['time']." ".$val['action']."\n";
+					$count++;
+				}
+				else { $skipped++; }
+			}
+			fputs($fp,$line,strlen($line));
+			fclose($fp);
+			$this->disp_msg("done. ($count entries to ".$seenfile.", $skipped skipped)","...");
+		}
+		return true;		
+	}
+	
+	/* load user file from disk
+	 * 
+	 * @param 	string	seen file path (absolute or relative) prefixed by datadir value
+	 * @return 	int		value is 1 if all succeeded
+	 * @return	string	will return string if there was an error		
+	 */
 	private function load_seenfile($file) {
 		if (!$fp = @fopen($file,'r')) { return "could not open seen file: $file"; }
-		$line = 0; $count = 0;
+		$line = 0; $count = 0; $skipped = 0;
 		while (!feof($fp)) {
 			$line++;
 			$data = rtrim(fgets($fp,512));
@@ -121,9 +161,11 @@ class Phobos extends Nexus {
 				if (!preg_match("/^.+!.+@.+$]+/si",$this->gettok($data,1)) 			 ||
 					!preg_match("/^[0-9]$/si",$this->gettok($data,2))) ) { 
 						$this->disp_msg("warning: skipped invalid record in seen file ($file:$line)");
+						$skipped++;
 				}
 				else if ((time() - $this->gettok($data,2)) > 13515200) {
 					$this->disp_msg("warning: skipped really old record (+6mon) in seen file ($file:$line)");
+					$skipped++;
 				}
 				else {
 					$tmp_splitseen = explode(" ",3);
@@ -134,7 +176,7 @@ class Phobos extends Nexus {
 				}
 			}
 		}
-		$this->disp_msg("loaded $count seen records from '$file'");
+		$this->disp_msg("loaded $count seen records from '$file' ($skipped skipped)");
 		fclose($fp);
 		return 1;
 	}	
@@ -427,7 +469,7 @@ class Phobos extends Nexus {
 			$this->timer('pub_command_throttle',null,3);
 			
 			switch ($cmd) {
-				case $cmd == "seen":
+				case ($cmd == "seen" && $this->client['seen']):
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
@@ -445,7 +487,7 @@ class Phobos extends Nexus {
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key)) {
-								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ".$this->seen_list[$key]['action']);
+								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
 								break;
 							}
 						}
