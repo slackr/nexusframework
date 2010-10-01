@@ -101,9 +101,6 @@ class Phobos extends Nexus {
 		$this->massdeop_victims = array();
 		$this->seen_list = array();
 		
-		$load_seen = $this->load_seenfile($this->client['data_dir'].$this->client['seen_file']);
-		if ($load_seen) { $this->disp_msg($load_seen); }	
-		
 		// to make sure the bot does not flood out with too many attempts to regain ops on the same channel
 		$this->regain_ops_completed = array();
 		
@@ -111,10 +108,15 @@ class Phobos extends Nexus {
 		$this->default_config = 'phobos.conf';
 		$this->version_reply = 'phobos 1.0 (nexus)';
 
+	}
+	
+	protected function on_init() {
+		$load_seen = $this->load_seenfile($this->client['data_dir'].$this->client['seen_file']);
+		if ($load_seen) { $this->disp_msg($load_seen); }			
+
 		/* spawn timer to save seen file
 		 */
 		if ($this->client['save_data']) { $this->timer('save_seen_file','write_seenfile()',$this->client['save_data']*60,true); }
-
 	}
 	
 	/* trying to save the notify file before unloading the program

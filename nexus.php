@@ -181,16 +181,17 @@ abstract class Nexus {
 		$this->client = $this->client_defaults;
 		$this->config = $this->default_config;
 		$load_argv = $this->check_arguments($_SERVER['argv']);			
-		
-		/* this has to return 1, anything else is an error
-		 * and will be displayed by disp_msg() later on
-		 */
-		$load_conf = $this->load_config($this->config);
+
 
 		/* for customization purposes
 		 * call abstract class on_load() since child classes cannot have a constructor
 		 */
 		$this->on_load();
+
+		/* this has to return 1, anything else is an error
+		 * and will be displayed by disp_msg() later on
+		 */
+		$load_conf = $this->load_config($this->config);
 		
 		/* we don't care if the chanfile is empty or for whatever reason it fails to load
 		 * we can fall back on the configuration file for channels to join
@@ -269,6 +270,8 @@ abstract class Nexus {
 					ini_set("max_execution_time", "0");
 					ini_set("max_input_time", "0");
 					set_time_limit(0);
+
+					$this->on_init();
 					
 					$this->connect();
 				}
@@ -1374,6 +1377,8 @@ abstract class Nexus {
 	abstract protected function on_privmsg($nick,$host,$text);
 	abstract protected function on_load();
 	abstract protected function on_unload();	
+	abstract protected function on_init();
+	
 
 	/* clean up when the object is destroyed
 	 */
