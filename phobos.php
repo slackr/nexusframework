@@ -479,7 +479,7 @@ class Phobos extends Nexus {
 								$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you on $chan"); 
 								$tmp_usernotified = true;
 							}
-							$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)")); 
+							$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
 							$seen_found = true;
 							break;
 						}
