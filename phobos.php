@@ -105,7 +105,7 @@ class Phobos extends Nexus {
 		$this->regain_ops_completed = array();
 		
 		$this->userflags = 'aohvcjpn';
-		$this->default_config = 'phobos.conf';
+		$this->config = 'phobos.conf';
 		$this->version_reply = 'phobos 1.0 (nexus)';
 
 	}
