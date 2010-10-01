@@ -1324,7 +1324,7 @@ abstract class Nexus {
 			($text[0] == $this->client['cmd_char']) &&
 			!isset($this->ident[$nick])) {
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1)));			
-			$this->timer('priv_command_throttle',null,30);
+			$this->timer('priv_command_throttle',null,10);
 			switch ($cmd) {
 				case ($cmd == "ident" || $cmd == "verify" || $cmd == "login"):
 					$usr = $this->gettok($text,2);
