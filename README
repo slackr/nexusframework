@@ -1,0 +1,608 @@
+      Nexus Framework Documentation
+
+      The current release version is: 1.02
+
+	1. What is Nexus?
+	2. How to get Nexus
+		o Download
+		o How to get started
+	3. Features
+		o Client Configuration File
+		o Channel Configuration File
+		o User Database File
+		o Server Connection
+		o Daemonizing
+		o Signal Trapping
+		o IRC Events Handler
+		o User Identification
+	4. Methods
+		o Triggers
+		o Timers
+		o Utilities
+	5. Variables
+		o Configuration
+		o Arrays
+
+
+      1. WHAT IS NEXUS?
+
+	The Nexus IRC Framework was written to facilitate the creation of IRC clients (such as bots) 
+	using PHP5. Nexus was designed to handle every tedious programming task that a would-be IRC 
+	client creator may have to undergo. Things such as managing RAW replies from the server, 
+	keeping track of users and their hostnames on each channel and reading configuration data 
+	from a file are all handled by the parent class 'Nexus'.
+
+	Each client will extend on the Nexus Framework class. This is an + abstract class and it 
+	allows the programmer to use a list of + abstract methods to customize their clients 
+	functionality. These methods are triggered whenever a specific IRC event happens such as: a 
+	user changes their nickname or a new channel key is set. For a listing of all methods and 
+	their descriptions see the METHODS section. 
+
+	Nexus requires that PHP-CLI (version 5.x or higher) be available on the machine running it. 
+	Nexus will run on any platform that PHP5 runs on, however a Unix environment is recommended.
+
+	The Nexus IRC Framework was created by blindk@efnet 
+
+      2. HOW TO GET NEXUS
+
+	o Download
+
+		The Nexus IRC Framework can be downloaded from the SourceForge project page:
+		http://sourceforge.net/projects/nexusframework/
+
+		Each release includes a version of the Phobos IRC client, created with Nexus.
+
+	o How to get started
+
+		Read the Nexus documentation fully, specifically the METHODS and VARIABLES sections.
+
+		As an example, Phobos was included with the Nexus release. The phobos.php and 
+		sample.php are good templates to start with.
+
+
+      3. FEATURES
+
+	Nexus has a number of features that faciliate the creation of an IRC client such as a bot. 
+	The framework was designed to parse IRC data and fire events. These events can be captured 
+	by the programmer to easily give the client functionality. Additionally, Nexus manages 
+	things such as the user and channel databases as well as the client configuration 
+	(client.conf) file.
+
+	o Client Configuration File
+
+		Nexus allows the client owner to specify configuration parameters in a file of their 
+		choosing. By default, it looks for the file specified by $this->default_config. The 
+		default value for this is: client.conf.
+
+		The format of the main configuration file is as follows:
+		<settign> <value1 value2 ... valueN>
+
+		These settings are added to the following array:
+		$this->client[<setting1>]
+
+		The following channel container format is also accepted:
+		channel <#value> {
+			<setting1> <value1 value2 ... valueN>
+			<setting2> <value1 value2 ... valueN>
+		}
+
+		When a channel container is encountered, all settings are added to the following 
+		array:
+		$this->settings[<#value>][<setting1>]
+
+		A user can specify (or not) any setting they wish, however some are required by 
+		Nexus to function.
+
+		The $this->client_defaults holds the default values for Nexus. It can be overwritten 
+		in on_load but it is not recommended as it can cause the client to stop functioning 
+		properly.
+
+		The hardcoded default values are as follows:
+			'nick' 		 => 'mynick',		
+			'realname'	 => $this->version_reply." - ".$this->framework_version,
+			'ident'		 => 'mynick',
+			'host' 		 => '0.0.0.0',
+			'cmd_char' 	 => '.',		
+			'data_dir' 	 => 'data/',
+			'user_file'	 => 'client.user',
+			'chan_file'	 => 'client.chan',
+			'servers'	 => array(),
+			'save_data'	 => 60,
+			'join_delay'	 => 3,
+			'keepnick_retry' => 100,
+			'debug_raw'	 => 0
+
+		For more examples of configuration settings, please see the example config included 
+		with this release.
+
+	o Channel Configuration File
+
+		When a channel container is specified by the client configuration, Nexus loads it in 
+		memory. The channel memory is dumped into the channel file (identified by 
+		'chan_file'). The 'save_data' setting specifies how often (in minutes) to save this 
+		configuration. This file is not designed to be human readable and should not be 
+		tampered with. 
+
+		Each line in this file contains a channel and its configuration settings. 
+
+		The default channel configuration is stored in $this->channel_defaults and can be 
+		adjusted using on_load. 
+
+		The format for this file is as follows:
+		<#channel1>{<setting1>=<value1>;<setting2>=<value2>;}
+		<#channel2>{<setting1>=<value1>;<setting2>=<value2>;<setting3>=<value3>;}
+
+		Nexus will scramble the channel names as well as any values that are not integers 
+		(such as a channel key). This helps prevent irregular channel names or values from 
+		breaking the data load process.
+
+		The values in here overwrite the $this->default_settings variable, but are 
+		overwritten by the main configuration file's channel containers.
+
+	o User Dataase File
+
+		As users are created, either through IRC or via the -u switch, they are added into 
+		memory. The user memory is dumped into the user file (identified by 'user_file'). 
+		The 'save_data' setting specifies how often (in minutes) to save this configuration.
+
+		Each line contains the username, the flags, mask and a password hash.
+
+		Users can be added manually using the -u switch (./nexusclient -u) or by using the 
+		user_add and user_del Nexus methods (See the METHODS section for usage information). 
+	
+	o Server Connection
+		
+		Nexus allows the user to specify a list of servers the client should connect to. 
+
+		This is the format for 'server' configuration directive:
+		server <ip1> <port1> <password1>
+		server <ip2> <port2> <password2>
+
+		The <password> parameter is optional.
+
+		In the order specified Nexus will connect to the servers. If it gets disconnected it 
+		moves on to the next one in the list. When the list is exhausted, it tries the first 
+		server again and the cycle continues.
+
+	o Daemonizing
+
+		Nexus will also attempt to send the client in the background by default. This can be 
+		disabled by the '-f' switch. 
+		
+		This feature requires the pcntl_* family of functions, which as of now is only 
+		available for non-Windows platforms. 
+		
+		See http://ca.php.net/pcntl for more information.
+
+		If these functions are not available, Nexus will not fork() and will require the '&' 
+		to send into the background.
+
+		To prevent the client from going into the background without using the '-f' switch, 
+		the programmer can set the $this->fork to (bool)false in the $this->on_load() (See 
+		METHODS).
+
+		The $this->fork_possible is set to (bool)true once the compatibility check has 
+		determined that the proper functions exist.
+
+	o Signal Trapping
+		
+		Nexus will trap the following signals: SIGTERM, SIGUSR1, SIGINT, SIGHUP and attempt 
+		a clean exit of the application. The pcntl_* family of functions is required.
+
+		The $this->bye() function will be called when one of the above signals is trapped. 
+		This method terminates the application but attempts to write the user file and chan 
+		file ($this->write_all()) first.
+
+		See http://ca.php.net/pcntl for more information.
+
+	o IRC Events Handler
+
+		Nexus will parse IRC raw data and fire event triggers. See the Triggers section in 
+		METHODS for more information.
+
+	o User Identification
+
+		Users on IRC can identify to the client if they are in the user database and by 
+		using the built in 'verify' command. They must prefix the verify command with the 
+		'cmd_char' specified in the configuration file.
+
+		The format is as follows:
+		<cmd_char>verify [user] [plain text password]
+
+		'ident' and 'login' are aliases for 'verify'
+
+		If the user quits IRC after identification, they will have to reidentify when they 
+		come back.
+
+
+      4. METHODS
+
+	Nexus gives the programmer access to three types of methods: Triggers, Timers and Utilities. 
+	
+	Triggers must be specified in the client class (EVEN IF THEY DONT DO ANYTHING!) or the PHP 
+	will error. These are abstract methods specified in the Nexus class and are triggered when 
+	the particular event takes place. The parameters passed are pre-defined in the Nexus class 
+	and cannot be altered in the Client class. 
+
+	Timers can be created to execute PHP code at a later time. The programmer can also specify 
+	if they want the timer to execute only once or loop infinitely. Timers are very useful when 
+	scripting functionality such as flood protection or nickname juping.
+
+	 Example: If the client is kicked from a channel ($knick == $this->me in the on_kick 
+	 trigger), instead of joining immediately and potentially causing the client the flood out, 
+	 the programmer can create a timer which executes 'cmd_join(#channel)' after 5 seconds.
+
+	Utilities are protected methods defined in Nexus and cannot be overwritten in the Client 
+	class. They can be called in the Client class to perform certain operations such as adding a 
+	user to memory or writing the userfile. Since the utilities are located in the parent class, 
+	they must be called using the $this prefix (eg: $this->write_chanfile()). This is true for 
+	all variables defined in the Nexus class (See VARIABLES section).
+
+	o Triggers
+
+		+ on_nick($nick,$host,$newnick);
+		 This is triggered when a user changes their nickname. Due to the nature of the IRC 
+		 protocol, a channel variable is not passed to this function. The programmer will 
+		 have to loop through the list of known channels ($this->chans) in order to perform 
+		 a channel specific action. 
+		$nick  is the user changing their nickname, or essentially the 'old' nickname
+		$newnick is the nickname their are changing to
+
+		+ on_key($nick,$host,$chan,$key);
+		 This even is triggered when a channel key is set. 
+		$key is the channel key being set.
+
+		+ on_unkey($nick,$host,$chan,$key);	
+		 In contrast to the on_key event, this is triggered when a channel key is removed. 
+		 Certain IRCDs will add a parameter to the '-k' mode, which is stored in the $key 
+		 variable. This parameter is usually '*' if anything at all.
+
+		+ on_op($nick,$host,$chan,$onick);
+		 This event is triggered when a user is opped in a channel. It is only triggered if 
+		 the mode is '+o' and not any other UnrealIRCD variant.
+		$onick is the user being opped
+		$nick is the user doing the opping
+
+		+ on_deop($nick,$host,$chan,$onick);
+		 Triggered when a user is deopped, and only if the mode is '-o'.
+		$onick is the user being deopped
+		$nick is the user doing the deopping
+
+		+ on_vo($nick,$host,$chan,$vnick);
+		 This event is triggered when a user is voiced in a channel.
+		$vnick is the user being voiced
+		$nick is the user doing the voicing.
+
+		+ on_devo($nick,$host,$chan,$vnick);
+		 Triggered when a user is devoiced in a channel
+		$vnick is the user being devoiced
+		$nick is the user doing the devoicing
+
+		+ on_hop($nick,$host,$chan,$hnick);
+		 This event is triggered when a user is half-opped in a channel.
+		$hnick is the user half-opped
+		$nick is the user doing the half-opping
+
+		+ on_dehop($nick,$host,$chan,$hnick);
+		 Triggered when a user is de-half-opped in a channel.
+		$hnick is the user being de-half-opped
+		$nick is the user doing the de-half-opping
+
+		+ on_ban($nick,$host,$chan,$mask);
+		 Triggered when a ban is set in a channel. 
+		$host is the mask of the user setting the ban
+		$mask is the hostmask being banned
+
+		+ on_unban($nick,$host,$chan,$mask);
+		 Triggered when a ban is removed from a channel. 
+		$host is the mask of the user removing the ban
+		$mask is the hostmask being unbanned
+
+		+ on_mode($nick,$host,$chan,$mode,$param); 
+		 This is triggered when a mode is set in a channel that is not handled by any other 
+		 trigger (such as: on_op, on_vo).
+		$mode is the mode being set (example: l, R, i etc.)
+		$param is the parameter that accompanies this mode, if any (example: *!*@*.ca with 
+		$mode = e or 'exclude')
+
+		+ on_demode($nick,$host,$chan,$mode,$param);
+		 This is triggered when a mode is removed from a channel that is not handled by any 
+		 other trigger (such as: on_deop, on_devo).
+		$mode is the mode being removed (example: l, R, i etc.)
+		$param is the parameter that accompanies this mode, if any (example: *!*@*.ca with 
+		$mode = e or 'exclude')
+
+		+ on_join($nick,$host,$chan);
+		 Triggered when a user joins a channel, including the client itself.
+
+		+ on_part($nick,$host,$chan);
+		 Triggered when a user parts a channel, including the client itself.
+
+		+ on_kick($nick,$host,$chan,$knick,$reason);
+		 Triggered when a user is kicked from a channel. The client could be the kicker or 
+		 the kickee.
+		$nick is the kicker
+		$knick is the nickname being kicked from the $chan
+		$reason is the reason for the kick
+
+		+ on_quit($nick,$host,$reason);
+		 This is triggered when a user disconnects from the IRC server. Due to the nature of 
+		 the IRC protocol, a channel variable is not passed to this function. The programmer 
+		 will have to loop through the list of known channels ($this->chans) in order to 
+		 perform a channel specific action. 
+		$nick  is the user disconnecting
+		$reason is the quit reason sent by their client
+
+		+ on_pubmsg($nick,$host,$chan,$text);
+		 Triggered when a message is sent to a channel (also known as a public message).
+		$text is what $nick said in $chan
+
+		+ on_privmsg($nick,$host,$text);
+		 Triggered when a user sends a private message to the client.
+		$text is what $nick said to us
+
+		+ on_load();
+		 When a client is created, it will extend the Nexus Framework. Due to critical 
+		 functions which are being called by Nexus' constructor method, it has been made 
+		 'final'. In the OOP world this means it cannot be overwritten by a child class in 
+		 the same manner as the abstract trigger methods. For this reason, the on_load 
+		 method is called by Nexus shortly after the initialization of the object. It is 
+		 called before any configuration loading, but after the compatibility check. 
+
+	o Timers
+
+		+ timer($name,$command,$delay,$loop = false);
+		 This method creates a timer using the parameters supplied. The $command holds php 
+		 code to be executed. Note that: '$this->' is prefixed and ';' is postfixed to each 
+		 command. If you wish to execute $this->send('whois user'), simply use 'send("whois 
+		 user")' as the command.
+		$name is the timer name, if null a random name will be generated
+		$command is the command to execute upon expiry
+		$delay is the time to wait (in seconds) before expiring the timer
+		$loop is by default off, but if (bool)true the timer would loop until killed
+
+		+ kill_timer($name);
+		 Use this method to kill a currently running timer. The timer name must be 
+		 specified.
+		$name is the name of the timer to be killed
+
+		+ is_timer($name);
+		 This method returns a boolean if the timer with $name exists.
+		$name is the name of the timer to be checked
+	
+	o Utilities
+
+		+ user_add($user,$pass,$host,$flags);
+		 To add a new user to the user memory (and ultimately the userfile) the programmer 
+		 can use this method. In order for the changes to be saved, write_userfile() or 
+		 write_all() must be invoked to write memory to disk. The password passed is plain 
+		 text and will be encrypted by Nexus' encrypt() method (The default method is md5). 
+		 This method returns (bool)false if the user exists and it displays an error to the 
+		 console.
+		$user is the username to add
+		$pass is the plain text password for this user
+		$host is the wild mask which is associated with this account
+		$flags can be any combination of chars
+			
+		+ user_del($user);
+		 To remove an existing user from memory (and ultimately the userfile) the programmer 
+		 can use this method. In order for the changes to be saved, write_userfile() or 
+		 write_all() must be invoked to write memory to disk. This method returns 
+		 (bool)false if the user does not exist and it displays an error to the console.
+		$user is the username to delete
+
+		+ write_userfile();
+		 This method writes all users stored in $this->users to the file specified by 
+		 'user_file'. It returns a boolean upon success or failure of the write.
+		
+		+ write_chanfile();
+		 This method writes all users stored in $this->settings to the file specified by 
+		 'chan_file'. It returns a boolean upon success or failure of the write.
+
+		+ write_all();
+		 This method is an alias for the userfile and chanfile write methods. It does not 
+		 return anything.
+
+		+ send($raw_data);
+		 This method is used to send RAW data to the IRC server.
+
+    5.  VARIABLES
+
+	There are many things to consider when creating an IRC client. Nexus takes care of most of 
+	the background work of successfully connecting and staying connected to IRC. The idea is to 
+	let the programmer focus on the clients functionality rather than the tedious work. 
+
+	The following is a list of variables accessible by the Client class which extends the Nexus 
+	Framework. 
+	
+	Please note that since these are declared in the Nexus class they must be accessed using the 
+	object reference $this (eg: $this->version_reply as opposed to $version_replay). 
+
+	
+	o Configuration
+
+		$version_reply;	
+		 This is what the client will reply with if queried for the version via CTCP. If 
+		 left blank 
+		 (default), the client will not reply to CTCP VERSION requests.
+
+		$raw;
+		 This variable holds the raw data read from the IRC server. With the help of 
+		 'debug_raw' a 
+		 programmer may find this useful.
+
+		$fork = true;
+		 By default the client should try to go into the background (See Daemonizing under 
+		 FEATURES). This only affects non-Windows platforms with support for the pcntl_* 
+		 family of 
+		 functions.
+		
+		$verbose = true;	
+		 If set to false, the client's disp_* methods will not display anything to the 
+		 screen. If 
+		 the client is fork()ed it will set this to false automatically.
+
+		$me;
+		 This variable always holds the clients current nickname on IRC.
+
+		$keepnick;
+		 This is the nickname the client wants to keep (juped). This is set by the 'nick' 
+		 directive 
+		 in the client configuration file.
+
+		$host;
+		 This is the clients host in the ident@host format. It is retrieved by Nexus upon 
+		 connection 
+		 to IRC.
+			
+		$uptime;
+		 The date in unixtime of when the client was launched.
+
+		$ontime;
+		 The date in unixtime of when the client connected to an IRC server.
+		
+		$max_nick_tries = 5;
+		 How many times to attempt a new nickname if our nickname is in use.
+
+		$min_pass_len = 4;	
+		 The minimum password length allowed when adding new users.
+		
+		$min_keepnick_retry = 30;
+		 In seconds, this is the minimum allowed time to be set in the client configuration 
+		 for 
+		 'keepnick_retry'. Setting this too low can cause Excess Floods.
+		
+		$min_save_period = 5;	
+		 In minutes, this is the minimum allowed time to be set in the client configuration 
+		 for 
+		 'save_data'. Setting this too low can cause high load averages.
+
+		$userflags;
+		 This is a list of access flags that the client knows of.
+
+		$require_admin = true;
+		 By default, Nexus requires that at least one user exit in the userfile before 
+		 launching.
+		
+		$retry_time = 300;
+		 If the client cannot join a channel (channel is limited or client is banned), how 
+		 long to 
+		 wait (in seconds) before trying to join again. If this is set too low it can cause 
+		 Excess 
+		 Floods.
+		
+		$default_config = 'client.conf';
+		 This is the default file Nexus will look for within the 'data_dir' directory.
+
+		$status_chars = '@%+';
+		 This is a list of known channel operator status indicators. The default values are 
+		 true for 
+		 most IRCDs. If the client should connect to an unorthodox network, it may break the 
+		 nickname list if this variable is not adjusted.
+
+	o Arrays
+	
+		$users = array();
+		 This is an array of all users that have access to the client. It is populated by 
+		 Nexus at 
+		 startup.
+
+		 The format is as follows:
+			$this->users
+				\
+				 `->[username]
+					\
+					 `->[mask] = 'user*@host'
+					    [pass] = <encrypted password>
+					    [flags] = <access flags>
+
+
+		$ident = array();
+		 This is the array that holds all the users on IRC which have successfully 
+		 identified to the 
+		 client.
+
+		 The host saved is the user's who has just identified. Please note that the [user] 
+		 key and 
+		 the [irc_nickname] key could be different. [user] is the user to which the 
+		 [irc_nickname] 
+		 has identified to using Nexus' '<cmd_char>verify' command.
+
+		 The format is as follows:
+			$this->ident
+				\
+				 `->[irc_nickname]
+					\
+					 `->[host] = 'user@host'
+					    [user] = <user ident>
+					    [flags] = <access flags>
+
+		$chans = array();
+		 This is an array of channels and nicknames for each channel.
+
+		 The format is as follows:
+			$this->chans
+				\
+				 `->[#channel]
+					\
+					 `->[nickname]
+						\
+						 `->[host] = 'user@host'
+						    [status] = '@ | % | +'
+
+		 Each channel has its own list of nicknames, each with a host and status. This is 
+		 adjusted 
+		 by Nexus as users join, quit, part or get kicked and so on.
+
+
+		$settings = array();
+		 These are the channel settings loaded from the client configuration file's channel 
+		 containers.
+
+		 The format is as follows:
+			$this->settings
+				\
+				 `->[#channel]
+					\
+					 `->[setting] = <value>
+
+		$client = array();
+		 These are the client settings loaded from the client configuration file. Anything 
+		 that is 
+		 not in a channel container ends up in here.
+
+		 The format is as follows:
+			$this->client
+				\
+				 `->[setting] = <value>
+		
+		$chan_defaults;
+		 These are the default channel settings to be loaded into $this->settings when Nexus 
+		 reads a 
+		 channel container from the client configuration.
+
+		 Example: Add this to on_load() (See METHODS) to specify default channel setting 
+		 values: 
+		  $this->chan_defaults = array('flood_protection' => 0, 'autoop' => 1);
+
+		$client_defaults;
+		 These are the client configuration defaults. See FEATURES for more information.
+							
+		$timers = array();
+		 This holds an array of all the timer objects created during the client runtime. See 
+		 the 
+		 Timers section of METHODS for more information on manipulating timers.
+				
+		$config_regex = array();
+		 Nexus will use this array of keys with regular expressions to test against each 
+		 configuration loaded from the client configuration file. If a setting matches a key 
+		 in this 
+		 array, it will be test. If it fails the client will exit with an error.
+
+		 These are the default regular expression checks Nexus will perform:
+
+			'nick'			=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
+			'ident'			=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
+			'debug_raw'		=> '/[01]/si',
+			'join_delay'		=> '/[0-9]+/si',
+			'keepnick_retry'	=> '/[0-9]+/si'
