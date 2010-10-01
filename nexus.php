@@ -186,6 +186,11 @@ abstract class Nexus {
 		 * and will be displayed by disp_msg() later on
 		 */
 		$load_conf = $this->load_config($this->config);
+
+		/* for customization purposes
+		 * call abstract class on_load() since child classes cannot have a constructor
+		 */
+		$this->on_load();
 		
 		/* we don't care if the chanfile is empty or for whatever reason it fails to load
 		 * we can fall back on the configuration file for channels to join
@@ -196,12 +201,6 @@ abstract class Nexus {
 		/* once we have proper values for user_file/chan_file we can prompt
 		 */
 		if ($this->prompt_for_adduser) { $this->user_add_prompt(); exit(); }
-
-
-		/* for customization purposes
-		 * call abstract class on_load() since child classes cannot have a constructor
-		 */
-		$this->on_load();
 
 		if ($load_argv && $load_conf == 1) {
 			
