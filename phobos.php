@@ -101,7 +101,7 @@ class Phobos extends Nexus {
 		$this->massdeop_victims = array();
 		$this->seen_list = array();
 		
-		$load_seen = $this->load_seen($this->client['data_dir'].$this->client['seen_file']);
+		$load_seen = $this->load_seenfile($this->client['data_dir'].$this->client['seen_file']);
 		if ($load_seen) { $this->disp_msg($load_seen); }	
 		
 		// to make sure the bot does not flood out with too many attempts to regain ops on the same channel
