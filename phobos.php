@@ -290,14 +290,14 @@ class Phobos extends Nexus {
 			}
 		}
 		if ($this->me != $nick) {
-			$this->seen_update_record($nick,$host,"joining $chan");		
+			$this->seen_update_record("$nick!$host","joining $chan");		
 		}
 	}
 	
 	protected function on_part($nick,$host,$chan) {
 		if ($this->me != $nick) {
 			if (sizeof($this->chans[$chan]) == 1 && !$this->isop($this->me,$chan)) { $this->send("part $chan\r\njoin $chan"); }
-			$this->seen_update_record($nick,$host,"leaving $chan");			
+			$this->seen_update_record("$nick!$host","leaving $chan");			
 		}	
 	}	
 	
@@ -335,13 +335,13 @@ class Phobos extends Nexus {
 			}
 		}				
 		if ($this->me != $nick) {
-			$this->seen_update_record($nick,$host,"getting kicked from $chan by $nick ($reason)");
+			$this->seen_update_record("$nick!$host","getting kicked from $chan by $nick ($reason)");
 		}
 	}	
 	
 	protected function on_nick($nick,$host,$newnick) {
 		if ($this->me != $nick) {
-			$this->seen_update_record($nick,$host,"changing nick to $newnick");
+			$this->seen_update_record("$nick!$host","changing nick to $newnick");
 		}
 	}		
 
@@ -349,7 +349,7 @@ class Phobos extends Nexus {
 		foreach ($this->chans as $key => $val) {
 			if ($this->me != $nick) {
 				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("part $key\r\njoin $key"); }
-				$this->seen_update_record($nick,$host,"quitting IRC");
+				$this->seen_update_record("$nick!$host","quitting the server");
 			}
 		}	
 	}
@@ -449,7 +449,7 @@ class Phobos extends Nexus {
 								break;								
 								case ($what == "*" || $what == "all"):
 									$this->write_all();
-									$this->write_notifyfile();
+									$this->write_seenfile();
 									$wrt = "*";
 								break; 			
 							}
