@@ -177,16 +177,11 @@ abstract class Nexus {
 				$this->bye();
 			}
 		}
-
-		/* for customization purposes
-		 * call abstract class on_load() since child classes cannot have a constructor
-		 */
-		$this->on_load();
 		
 		$this->client = $this->client_defaults;
 		$this->config = $this->default_config;
 		$load_argv = $this->check_arguments($_SERVER['argv']);			
-				
+		
 		/* this has to return 1, anything else is an error
 		 * and will be displayed by disp_msg() later on
 		 */
@@ -201,7 +196,13 @@ abstract class Nexus {
 		/* once we have proper values for user_file/chan_file we can prompt
 		 */
 		if ($this->prompt_for_adduser) { $this->user_add_prompt(); exit(); }
-		
+
+
+		/* for customization purposes
+		 * call abstract class on_load() since child classes cannot have a constructor
+		 */
+		$this->on_load();
+
 		if ($load_argv && $load_conf == 1) {
 			
 			$load_user = $this->load_userfile($this->client['data_dir'].$this->client['user_file']);
