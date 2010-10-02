@@ -1178,11 +1178,8 @@ abstract class Nexus {
 		@return	string
 	 */
 	protected function iswm($wild,$expanded) {
-		$rpl = array(	'/' => '\/',
-						'.' => '[.]',
-						'^' => '[^]',						
-						'$' => '\$',												
-						'*' => '.*');
+		$wild = preg_quote(stripslashes($wild));
+		$rpl = array('*' => '.*');
 		foreach ($rpl as $key => $val) { $wild = str_replace($key,$val,$wild); }
 		return preg_match('/^'.$wild.'$/si',$expanded) ? true : false;
 	}	
