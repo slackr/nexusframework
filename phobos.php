@@ -177,7 +177,7 @@ class Phobos extends Nexus {
 				}
 				else {
 					$tmp_splitseen = explode(" ",$data,4);
-					$this->seen_file[$tmp_splitseen[0]] = array( 	'host' => $tmp_splitseen[1],
+					$this->seen_list[$tmp_splitseen[0]] = array( 	'host' => $tmp_splitseen[1],
 																	'time' => (int)$tmp_splitseen[2],
 																	'action' => $tmp_splitseen[3]
 																);
@@ -488,7 +488,6 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
-					var_dump($this->seen_file);
 					if ($this->me == $tmp_seenwho) {
 							$this->send("PRIVMSG $chan :$nick: hi");
 							$seen_found = true;
