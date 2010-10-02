@@ -485,36 +485,34 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
-					switch ($seen_found) {
-						case ($seen_found == false):
-							if ($this->me == $tmp_seenwho) {
-								$this->send("PRIVMSG $tmp_seenwho :$nick: hi");
-								$seen_found = true;
-							}
-						case ($seen_found == false):
-							foreach ($this->chans as $key => $val) {
-								if ($this->chans[$key][$tmp_seenwho]) {
-									if (!isset($this->chans[$chan][$tmp_seenwho])) {
-										$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you on $chan"); 
-										$tmp_usernotified = true;
-									}
-									$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
-									$seen_found = true;
-									break;
-								}
-							}
-						case ($seen_found == false):
-							foreach ($this->seen_list as $key => $val) {
-								if ($this->iswm($tmp_seenwho,$key)) {
-									$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
-									$seen_found = true;
-									break;
-								}
-							}
-						case ($seen_found == false):
-							$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
+					if ($this->me == $tmp_seenwho) {
+							$this->send("PRIVMSG $tmp_seenwho :$nick: hi");
 							$seen_found = true;
-						break;
+					}
+					if (!$seen_found) {
+						foreach ($this->chans as $key => $val) {
+							if ($this->chans[$key][$tmp_seenwho]) {
+								if (!isset($this->chans[$chan][$tmp_seenwho])) {
+									$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you on $chan"); 
+									$tmp_usernotified = true;
+								}
+								$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
+								$seen_found = true;
+								break;
+							}
+						}
+					}
+					else if (!$seen_found) {
+						foreach ($this->seen_list as $key => $val) {
+							if ($this->iswm($tmp_seenwho,$key)) {
+								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
+								$seen_found = true;
+								break;
+							}
+						}
+					}
+					else {
+						$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
 					}
 				break;
 			}
