@@ -178,7 +178,7 @@ class Phobos extends Nexus {
 				else {
 					$tmp_splitseen = explode(" ",3);
 					var_dump($tmp_splitseen);
-					$this->seen_file[$tmp_splitseen[0]] = array( 	'time' => int($tmp_splitseen[1]),
+					$this->seen_file[$tmp_splitseen[0]] = array( 	'time' => (int)$tmp_splitseen[1],
 																	'action' => $tmp_splitseen[2]
 																);
 					$count++;
