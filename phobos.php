@@ -488,6 +488,7 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
+					var_dump($this->seen_file);
 					if ($this->me == $tmp_seenwho) {
 							$this->send("PRIVMSG $chan :$nick: hi");
 							$seen_found = true;
