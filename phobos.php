@@ -140,8 +140,8 @@ class Phobos extends Nexus {
 			}
 			$line = ""; $count = 0; $skipped = 0;
 			foreach ($this->seen_list as $key => $val) {
-				if ((time() - (int)$key['time']) < 13515200) {
-					$line .= $key." ".($key['host'] ? $key['host'] : "*@*")." ".$key['time']." ".$key['action']."\n";
+				if ((time() - (int)$val['time']) < 13515200) {
+					$line .= $key." ".($val['host'] ? $val['host'] : "*@*")." ".$val['time']." ".$val['action']."\n";
 					$count++;
 				}
 				else { $skipped++; }
