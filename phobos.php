@@ -600,6 +600,7 @@ class Phobos extends Nexus {
 		$this->seen_list[$item]['time'] = time();
 		$this->seen_list[$item]['action'] = $action;
 		$this->disp_msg("updated seen record: $item $action");
+		var_dump($this->seen_list);
 	}
 }
 
