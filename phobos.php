@@ -166,8 +166,8 @@ class Phobos extends Nexus {
 			$line++;
 			$data = rtrim(fgets($fp,512));
 			if ($data) { //don't test blank lines
-				if (!preg_match("/^.+!.+@.+$/si",$this->gettok($data,1)) 			 ||
-					!preg_match("/^[0-9]$/si",$this->gettok($data,2))) { 
+				if (!preg_match("/^.+[!].+[@].+$/si",$this->gettok($data,1)) 			 ||
+					!preg_match("/^[0-9]+$/si",$this->gettok($data,2))) { 
 						$this->disp_msg("warning: skipped invalid record in seen file ($file:$line)");
 						$skipped++;
 				}
