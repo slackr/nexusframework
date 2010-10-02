@@ -474,11 +474,11 @@ class Phobos extends Nexus {
 			}
 		}
 		if ($text[0] == $this->client['cmd_char'] &&
-			!$this->is_timer('pub_command_throttle')) {
+			!$this->is_timer('everyone_command_throttle')) {
 				
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1))-1);
 			
-			$this->timer('pub_command_throttle',null,3);
+			$this->timer('everyone_command_throttle',null,3);
 			
 			switch ($cmd) {
 				case ($cmd == "seen" && $this->client['seen'] == 1):
@@ -505,7 +505,7 @@ class Phobos extends Nexus {
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key)) {
-								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
+								$this->send("PRIVMSG $chan :last seen $key ".$this->seen_list[$key]['action'])." ".$this->duration($this->seen_list[$key]['time'])." ago";
 								$seen_found = true;
 								break;
 							}
