@@ -507,6 +507,7 @@ class Phobos extends Nexus {
 					echo var_dump($seen_found)."\n";
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
+							echo var_dump($seen_found)."- $tmp_seenwho : $key\n";
 							if ($this->iswm($tmp_seenwho,$key)) {
 								$this->send("PRIVMSG $chan :last seen $key ".$this->seen_list[$key]['action'])." ".$this->duration($this->seen_list[$key]['time'])." ago";
 								$seen_found = true;
