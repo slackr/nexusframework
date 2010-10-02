@@ -301,10 +301,12 @@ class Phobos extends Nexus {
 	
 	protected function on_part($nick,$host,$chan) {
 		if ($this->me != $nick) {
-			if (sizeof($this->chans[$chan]) == 1 && !$this->regain_ops_completed[$chan] && !$this->isop($this->me,$chan)) { $this->send("part $chan\r\njoin $chan"); }
-				$this->seen_update_record("$nick!$host","leaving $chan");
+			if (sizeof($this->chans[$chan]) == 1 && !$this->regain_ops_completed[$chan] && !$this->isop($this->me,$chan)) { 
+				$this->send("part $chan\r\njoin $chan"); 
 				$this->regain_ops_completed[$chan] = true;
 				$this->timer($timer_name,"regain_ops_completed['$chan'] = false",3600);
+			}
+			$this->seen_update_record("$nick!$host","leaving $chan");
 		}	
 	}	
 	
@@ -341,7 +343,7 @@ class Phobos extends Nexus {
 			}
 		}				
 		if ($this->me != $nick) {
-			$this->seen_update_record("$nick!$host","getting kicked from $chan by $nick ($reason)");
+			$this->seen_update_record("$knick!*","getting kicked from $chan by $nick ($reason)");
 		}
 	}	
 	

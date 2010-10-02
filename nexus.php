@@ -479,6 +479,7 @@ abstract class Nexus {
 	 */
 	protected function connect() {
 		$ip = gethostbyname($this->client['vhost']);
+		$this->disp_msg("resolved vhost ".$this->client['vhost']." -> ".$ip);
 		$options = array('socket' => array('bindto' => "$ip:0"));
 		$context = stream_context_create($options);
 		
