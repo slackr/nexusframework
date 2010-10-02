@@ -301,8 +301,10 @@ class Phobos extends Nexus {
 	
 	protected function on_part($nick,$host,$chan) {
 		if ($this->me != $nick) {
-			if (sizeof($this->chans[$chan]) == 1 && !$this->isop($this->me,$chan)) { $this->send("part $chan\r\njoin $chan"); }
-			$this->seen_update_record("$nick!$host","leaving $chan");			
+			if (sizeof($this->chans[$chan]) == 1 && !$this->regain_ops_completed[$chan] && !$this->isop($this->me,$chan)) { $this->send("part $chan\r\njoin $chan"); }
+				$this->seen_update_record("$nick!$host","leaving $chan");
+				$this->regain_ops_completed[$chan] = true;
+				$this->timer($timer_name,"regain_ops_completed['$chan'] = false",3600);
 		}	
 	}	
 	
@@ -334,9 +336,8 @@ class Phobos extends Nexus {
 				}
 		}
 		if ($this->me != $nick && $this->me != $knick) {
-			if (sizeof($this->chans[$chan]) == 1 && !$this->regain_ops_completed[$chan] && !$this->isop($this->me,$chan)) { 
+			if (sizeof($this->chans[$chan]) == 1 && !$this->isop($this->me,$chan)) { 
 				$this->send("part $chan\r\njoin $chan"); 
-				$this->regain_ops_completed[$chan] = true;
 			}
 		}				
 		if ($this->me != $nick) {
@@ -588,7 +589,7 @@ class Phobos extends Nexus {
 	protected function seen_update_record($item,$action) {
 		$this->seen_list[$item]['time'] = time();
 		$this->seen_list[$item]['action'] = $action;
-		$this->disp_msg("added seen record: $item $action");
+		$this->disp_msg("updated seen record: $item $action");
 	}
 }
 
