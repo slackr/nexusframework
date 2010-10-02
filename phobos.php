@@ -479,9 +479,9 @@ class Phobos extends Nexus {
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1))-1);
 			
 			$this->timer('pub_command_throttle',null,3);
-			
+			$this->disp_msg($cmd);
 			switch ($cmd) {
-				case ($cmd == "seen" && $this->client['seen']):
+				case ($cmd == "seen" && $this->client['seen'] == 1):
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
@@ -500,10 +500,12 @@ class Phobos extends Nexus {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key)) {
 								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
+								$seen_found = true;
 								break;
 							}
 						}
 					}
+					if (!$seen_found) { $this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'"); }
 				break;
 			}
 		}
