@@ -358,7 +358,7 @@ class Phobos extends Nexus {
 		foreach ($this->chans as $key => $val) {
 			if ($this->me != $nick) {
 				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("part $key\r\njoin $key"); }
-				$this->seen_update_record($nick,$host,"quitting the server");
+				$this->seen_update_record($nick,$host,"quitting");
 			}
 		}	
 	}
