@@ -166,7 +166,7 @@ class Phobos extends Nexus {
 			$line++;
 			$data = rtrim(fgets($fp,512));
 			if ($data) { //don't test blank lines
-				if (!preg_match("/^.+!.+@.+$]+/si",$this->gettok($data,1)) 			 ||
+				if (!preg_match("/^.+!.+@.+$/si",$this->gettok($data,1)) 			 ||
 					!preg_match("/^[0-9]$/si",$this->gettok($data,2))) { 
 						$this->disp_msg("warning: skipped invalid record in seen file ($file:$line)");
 						$skipped++;
@@ -479,7 +479,7 @@ class Phobos extends Nexus {
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1))-1);
 			
 			$this->timer('pub_command_throttle',null,3);
-			$this->disp_msg($cmd);
+			
 			switch ($cmd) {
 				case ($cmd == "seen" && $this->client['seen'] == 1):
 					$seen_found = false; 
