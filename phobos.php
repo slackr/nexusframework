@@ -141,7 +141,7 @@ class Phobos extends Nexus {
 			$line = ""; $count = 0; $skipped = 0;
 			foreach ($this->seen_list as $key => $val) {
 				if ((time() - $this->gettok($data,2)) > 13515200) {
-					$line .= $key." ".$val['time']." ".$val['action']."\n";
+					$line .= $key." ".($key['host'] ? $key['host'] : "*@*")." ".$val['time']." ".$val['action']."\n";
 					$count++;
 				}
 				else { $skipped++; }
@@ -166,20 +166,20 @@ class Phobos extends Nexus {
 			$line++;
 			$data = rtrim(fgets($fp,512));
 			if ($data) { //don't test blank lines
-				if (!preg_match("/^.+[!].+[@].+$/si",$this->gettok($data,1)) 			 ||
-					!preg_match("/^[0-9]+$/si",$this->gettok($data,2))) { 
+				if (!preg_match("/^.+[@].+$/si",$this->gettok($data,2)) 			 ||
+					!preg_match("/^[0-9]+$/si",$this->gettok($data,3))) { 
 						$this->disp_msg("warning: skipped invalid record in seen file ($file:$line)");
 						$skipped++;
 				}
-				else if ((time() - $this->gettok($data,2)) > 13515200) {
+				else if ((time() - $this->gettok($data,3)) > 13515200) {
 					$this->disp_msg("warning: skipped really old record (+6mon) in seen file ($file:$line)");
 					$skipped++;
 				}
 				else {
-					$tmp_splitseen = explode(" ",3);
-					var_dump($tmp_splitseen);
-					$this->seen_file[$tmp_splitseen[0]] = array( 	'time' => (int)$tmp_splitseen[1],
-																	'action' => $tmp_splitseen[2]
+					$tmp_splitseen = explode(" ",$tmp_splitseen,4);
+					$this->seen_file[$tmp_splitseen[0]] = array( 	'host' => $tmp_splitseen[1]
+																	'time' => (int)$tmp_splitseen[2],
+																	'action' => $tmp_splitseen[3]
 																);
 					$count++;
 				}
@@ -296,7 +296,7 @@ class Phobos extends Nexus {
 			}
 		}
 		if ($this->me != $nick) {
-			$this->seen_update_record("$nick!$host","joining $chan");		
+			$this->seen_update_record($nick,$host,"joining $chan");		
 		}
 	}
 	
@@ -307,7 +307,7 @@ class Phobos extends Nexus {
 				$this->regain_ops_completed[$chan] = true;
 				$this->timer($timer_name,"regain_ops_completed['$chan'] = false",3600);
 			}
-			$this->seen_update_record("$nick!$host","leaving $chan");
+			$this->seen_update_record($nick,$host,"leaving $chan");
 		}	
 	}	
 	
@@ -344,13 +344,13 @@ class Phobos extends Nexus {
 			}
 		}				
 		if ($this->me != $nick) {
-			$this->seen_update_record("$knick!*","getting kicked from $chan by $nick ($reason)");
+			$this->seen_update_record($knick,null,"getting kicked from $chan by $nick ($reason)");
 		}
 	}	
 	
 	protected function on_nick($nick,$host,$newnick) {
 		if ($this->me != $nick) {
-			$this->seen_update_record("$nick!$host","changing nick to $newnick");
+			$this->seen_update_record($nick,$host,"changing nick to $newnick");
 		}
 	}		
 
@@ -358,7 +358,7 @@ class Phobos extends Nexus {
 		foreach ($this->chans as $key => $val) {
 			if ($this->me != $nick) {
 				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("part $key\r\njoin $key"); }
-				$this->seen_update_record("$nick!$host","quitting the server");
+				$this->seen_update_record($nick,$host,"quitting the server");
 			}
 		}	
 	}
@@ -496,7 +496,7 @@ class Phobos extends Nexus {
 						foreach ($this->chans as $key => $val) {
 							if ($this->chans[$key][$tmp_seenwho]) {
 								if (!isset($this->chans[$chan][$tmp_seenwho])) {
-									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick!$host is looking for you in $chan"); 
+									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan"); 
 									$tmp_usernotified = true;
 								}
 								$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
@@ -508,7 +508,9 @@ class Phobos extends Nexus {
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key,$strict = false)) {
-								$this->send("PRIVMSG $chan :last seen $key ".$this->seen_list[$key]['action'])." ".$this->duration($this->seen_list[$key]['time'])." ago";
+								$this->send("PRIVMSG $chan :last seen $key ".($key['host'] ? "(".$key['host'].")":"")." ".
+											$this->seen_list[$key]['action'])." ".
+											$this->duration($this->seen_list[$key]['time'])." ago";
 								$seen_found = true;
 								break;
 							}
@@ -599,11 +601,11 @@ class Phobos extends Nexus {
 		$var = null;
 	}
 	
-	protected function seen_update_record($item,$action) {
-		$this->seen_list[$item]['time'] = time();
-		$this->seen_list[$item]['action'] = $action;
-		$this->disp_msg("updated seen record: $item $action");
-		var_dump($this->seen_list);
+	protected function seen_update_record($nick,$host,$action) {
+		if ($host) { $this->seen_list[$nick]['host'] = $host; }
+		$this->seen_list[$nick]['time'] = time();
+		$this->seen_list[$nick]['action'] = $action;
+		$this->disp_msg("updated seen record: $nick ($host) $action");
 	}
 }
 
