@@ -512,6 +512,7 @@ class Phobos extends Nexus {
 						case $seen_found:
 							$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
 						break;
+					}
 				break;
 			}
 		}
