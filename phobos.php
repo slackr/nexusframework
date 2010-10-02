@@ -493,7 +493,7 @@ class Phobos extends Nexus {
 						foreach ($this->chans as $key => $val) {
 							if ($this->chans[$key][$tmp_seenwho]) {
 								if (!isset($this->chans[$chan][$tmp_seenwho])) {
-									$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you in $chan"); 
+									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick!$host is looking for you in $chan"); 
 									$tmp_usernotified = true;
 								}
 								$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
