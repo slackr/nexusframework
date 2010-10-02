@@ -485,12 +485,10 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
-					echo var_dump($seen_found)."\n";
 					if ($this->me == $tmp_seenwho) {
 							$this->send("PRIVMSG $chan :$nick: hi");
 							$seen_found = true;
 					}
-					echo var_dump($seen_found)."\n";
 					if (!$seen_found) {
 						foreach ($this->chans as $key => $val) {
 							if ($this->chans[$key][$tmp_seenwho]) {
@@ -504,18 +502,15 @@ class Phobos extends Nexus {
 							}
 						}
 					}
-					echo var_dump($seen_found)."\n";
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
-							echo var_dump($seen_found)."- $tmp_seenwho : $key\n";
-							if ($this->iswm($tmp_seenwho,$key)) {
+							if ($this->iswm($tmp_seenwho,$key,$strict = false)) {
 								$this->send("PRIVMSG $chan :last seen $key ".$this->seen_list[$key]['action'])." ".$this->duration($this->seen_list[$key]['time'])." ago";
 								$seen_found = true;
 								break;
 							}
 						}
 					}
-					echo var_dump($seen_found)."\n";
 					if (!$seen_found) {
 						$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
 					}

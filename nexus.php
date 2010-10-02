@@ -1175,11 +1175,14 @@ abstract class Nexus {
 		
 		@param	string	wildcard
 		@param	string	test string
+		@param	bool	should we add .* around the wildcard?
 		@return	string
 	 */
-	protected function iswm($wild,$expanded) {
+	protected function iswm($wild,$expanded,$strict = true) {
 		$wild = str_replace("\*",".*",preg_quote(stripslashes($wild))); 
-		$this->disp_msg("matching /^$wild\$/si against $expanded");
+		$wild = str_replace("/","\\",$wild);
+		
+		if (!$strict) { $wild = ".*$wild.*"; }
 		return preg_match('/^'.$wild.'$/si',$expanded) ? true : false;
 	}	
 	
