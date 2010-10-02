@@ -485,27 +485,33 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
-					foreach ($this->chans as $key => $val) {
-						if ($this->chans[$key][$tmp_seenwho]) {
-							if (!isset($this->chans[$chan][$tmp_seenwho])) {
-								$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you on $chan"); 
-								$tmp_usernotified = true;
-							}
-							$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
-							$seen_found = true;
-							break;
-						}
-					}					
-					if (!$seen_found) {
-						foreach ($this->seen_list as $key => $val) {
-							if ($this->iswm($tmp_seenwho,$key)) {
-								$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
-								$seen_found = true;
+					switch ($seen_found) {
+						case $seen_found:
+							if ($this->me == $tmp_seenwho) {
+								$this->send("PRIVMSG $tmp_seenwho :$nick: hi");
 								break;
 							}
-						}
-					}
-					if (!$seen_found) { $this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'"); }
+						case $seen_found:
+							foreach ($this->chans as $key => $val) {
+								if ($this->chans[$key][$tmp_seenwho]) {
+									if (!isset($this->chans[$chan][$tmp_seenwho])) {
+										$this->send("PRIVMSG $tmp_seenwho :hey, $nick!$host is looking for you on $chan"); 
+										$tmp_usernotified = true;
+									}
+									$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
+									break;
+								}
+							}
+						case $seen_found:
+							foreach ($this->seen_list as $key => $val) {
+								if ($this->iswm($tmp_seenwho,$key)) {
+									$this->send("PRIVMSG $chan :last seen $key ".$this->duration($this->seen_list[$key]['time'])." ago ".$this->seen_list[$key]['action']);
+									break;
+								}
+							}
+						case $seen_found:
+							$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
+						break;
 				break;
 			}
 		}
