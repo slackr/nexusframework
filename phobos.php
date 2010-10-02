@@ -112,7 +112,7 @@ class Phobos extends Nexus {
 	
 	protected function on_init() {
 		$load_seen = $this->load_seenfile($this->client['data_dir'].$this->client['seen_file']);
-		if ($load_seen) { $this->disp_msg($load_seen); }			
+		if ($load_seen != 1) { $this->disp_msg($load_seen); }			
 
 		/* spawn timer to save seen file
 		 */
@@ -404,10 +404,10 @@ class Phobos extends Nexus {
 			$this->timer('pub_command_throttle',null,3);
 			
 			switch ($cmd) {
-				case "uptime":
+				case ($cmd == "uptime"):
 					$this->send("PRIVMSG $chan :up ".$this->duration($this->uptime));					
 				break;
-				case "ontime":			
+				case ($cmd == "ontime"):			
 					$this->send("PRIVMSG $chan :online ".$this->duration($this->ontime));					
 				break;	
 				case ($cmd == "up" || $cmd == "op"):
