@@ -1346,10 +1346,12 @@ abstract class Nexus {
 					}
 				break;
 			}
-			if ($text == "\001VERSION\001") { 
-				if ($this->version_reply) {
-					$this->send("notice $nick :\001VERSION ".$this->version_reply."\001");
-				}
+		}
+		if (!$this->is_timer('priv_command_throttle')) { 
+			if ($text == "\001VERSION\001" && 			
+				$this->version_reply ) {
+				$this->timer('priv_command_throttle',null,10);
+				$this->send("NOTICE $nick :\001VERSION ".$this->version_reply."\001");
 			}
 		}
 	}	
