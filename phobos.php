@@ -499,7 +499,7 @@ class Phobos extends Nexus {
 									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan"); 
 									$tmp_usernotified = true;
 								}
-								$this->send("PRIVMSG $chan :$tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
+								$this->send("PRIVMSG $chan :$nick: $tmp_seenwho is on $key".($tmp_usernotified ? " (user was notified)":"")); 
 								$seen_found = true;
 								break;
 							}
@@ -508,14 +508,14 @@ class Phobos extends Nexus {
 					if (!$seen_found) {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key,$strict = false)) {
-								$this->send("PRIVMSG $chan :last seen $key".($val['host'] ? " (".$val['host'].")":"")." ".$val['action']." ".$this->duration($val['time'])." ago");
+								$this->send("PRIVMSG $chan :$nick: last seen $key".($val['host'] ? " (".$val['host'].")":"")." ".$val['action']." ".$this->duration($val['time'])." ago");
 								$seen_found = true;
 								break;
 							}
 						}
 					}
 					if (!$seen_found) {
-						$this->send("PRIVMSG $chan :i don't know anyone matching '$tmp_seenwho'");
+						$this->send("PRIVMSG $chan :$nick: i don't know anyone matching '$tmp_seenwho'");
 					}
 				break;
 			}
