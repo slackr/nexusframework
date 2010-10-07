@@ -351,6 +351,7 @@ class Phobos extends Nexus {
 	protected function on_nick($nick,$host,$newnick) {
 		if ($this->me != $nick) {
 			$this->seen_update_record($nick,$host,"changing nick to $newnick");
+			$this->seen_update_record($newnick,$host,"changing nick from $nick");			
 		}
 	}		
 
@@ -488,14 +489,18 @@ class Phobos extends Nexus {
 					$seen_found = false; 
 					$tmp_usernotified = false;
 					$tmp_seenwho = $this->gettok($text,2);
-					if ($this->me == $tmp_seenwho) {
+					if (strlen(str_replace("*","",$tmp_seenwho)) == 0) {
+						$this->send("PRIVMSG $chan :$nick: please be more specific");
+						$seen_found = true; // skip all other seen checks, dirty but who cares.
+					}
+					if (!$seen_found && $this->me == $tmp_seenwho) {
 							$this->send("PRIVMSG $chan :$nick: hi");
 							$seen_found = true;
 					}
 					if (!$seen_found) {
 						foreach ($this->chans as $key => $val) {
 							if ($this->chans[$key][$tmp_seenwho]) {
-								if (!isset($this->chans[$chan][$tmp_seenwho])) {
+								if ($this->client['seen_notifyuser'] == 1 && !isset($this->chans[$chan][$tmp_seenwho])) {
 									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan"); 
 									$tmp_usernotified = true;
 								}
