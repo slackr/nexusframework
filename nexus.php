@@ -183,14 +183,14 @@ abstract class Nexus {
 		}
 		
 		$this->client = $this->client_defaults;
-		$this->config = $this->default_config;
-		$load_argv = $this->check_arguments($_SERVER['argv']);			
-
 
 		/* for customization purposes
 		 * call abstract class on_load() since child classes cannot have a constructor
 		 */
 		$this->on_load();
+		
+		$this->config = $this->default_config;
+		$load_argv = $this->check_arguments($_SERVER['argv']);
 
 		/* this has to return 1, anything else is an error
 		 * and will be displayed by disp_msg() later on
