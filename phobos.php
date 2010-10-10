@@ -521,7 +521,7 @@ class Phobos extends Nexus {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key,$strict = false)) {
 								$this->send("PRIVMSG $chan :$nick: last seen $key".($val['host'] ? " (".$val['host'].")":"")." ".$val['action']." ".$this->duration($val['time'])." ago");
-								$this->ping_notify_update_record($key,$nick,$chan)
+								$this->ping_notify_update_record($key,$nick,$chan);
 								$seen_found = true;
 								break;
 							}
