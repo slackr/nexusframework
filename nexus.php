@@ -703,7 +703,7 @@ abstract class Nexus {
 	 * @param	string	irc raw data to send
 	 */
 	protected function send($what) {
-		$this->disp_raw("send> $what");
+		$this->disp_raw("> send: $what");
 		fputs($this->sock, $what."\r\n");
 	}
 
