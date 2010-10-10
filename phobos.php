@@ -553,10 +553,11 @@ class Phobos extends Nexus {
 		}
 		if (!$this->is_timer('everyone_command_throttle')) {
 			
-			$this->timer('everyone_command_throttle',null,3);
-			
 			if (preg_match("/^\s*[\w_^`\\{}\[\]|-]+([:;,\s]\s?)+ping/si",$text)
 				&& $this->client['ping_notify'] == 1) {
+			
+				$this->timer('everyone_command_throttle',null,3);
+				
 				$tmp_usernotified = false;
 				$pingnick_found = false;
 				$pingnick = preg_replace("/^\s*([\w_^`\\{}\[\]|-]+)([:;,\s]\s?)+ping.*$/si","$1",$text);
@@ -567,7 +568,7 @@ class Phobos extends Nexus {
 					foreach ($this->chans as $key => $val) {
 						if ($this->ikey_exists($pingnick,$this->chans[$key])) {
 							if ($this->client['seen_notifyuser'] == 1) {
-								$this->send("PRIVMSG $tmp_seenwho :hey $pingnick, $nick ($host) is pinging you in $chan"); 
+								$this->send("PRIVMSG $pingnick :hey $pingnick, $nick ($host) is pinging you in $chan"); 
 								$tmp_usernotified = true;
 							}
 							$this->send("PRIVMSG $chan :$nick: $pingnick is on $key".($tmp_usernotified ? ", your ping was relayed":"")); 
