@@ -722,7 +722,7 @@ abstract class Nexus {
 	 * @param	array	an array of keys
 	 */	
 	protected function ikey_exists($needle,$haystack) {
-		foreach (array_keys($haystack) as $key => $val) {
+		foreach (array_keys($haystack) as $key) {
 			$this->disp_msg("checking '$needle' =~ '$key'");
 			if (preg_match("/^".$needle."$/si",$key)) { return true; }
 		}
