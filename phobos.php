@@ -95,11 +95,14 @@ class Phobos extends Nexus {
 										"ignorevoices"	=> "/[01]/s",
 										"ignorehops"	=> "/[01]/s",
 										"seen"			=> "/[01]/s",
+										"ping_notify"	=> "/[01]/s",										
 										"cmd_char"		=> '/[^a-z0-9]/'					
 										);
 										
 		$this->massdeop_victims = array();
 		$this->seen_list = array();
+		$this->ping_notify = array();
+		$this->max_ping_notify_records = 3;
 		
 		// to make sure the bot does not flood out with too many attempts to regain ops on the same channel
 		$this->regain_ops_completed = array();
@@ -201,11 +204,11 @@ class Phobos extends Nexus {
 		//$this->disp_msg("mode: $nick sets mode $chan +o $onick");
 	}
 	protected function on_deop($nick,$host,$chan,$onick) {
-		if ($this->settings[$chan]['massdeop'] == 1 &&
-			!$this->has_flag('p',$nick) && 
-			$this->me != $nick && 
-			$this->me != $onick &&
-			$this->isop($this->me,$chan)) {
+		if ($this->settings[$chan]['massdeop'] == 1 
+			&& !$this->has_flag('p',$nick) 
+			&& $this->me != $nick 
+			&& $this->me != $onick 
+			&& $this->isop($this->me,$chan)) {
 				$this->massdeop_flooders[$chan][$nick][count]++;
 				$timer_name = $this->rcrypt($chan.$nick."mdeop");
 				if ($this->settings[$chan]['massdeop_reop'] && sizeof($this->massdeop_victims[$chan])-1 <= 16) {
@@ -271,9 +274,9 @@ class Phobos extends Nexus {
 	protected function on_join($nick,$host,$chan) {
 		if ($this->isop($this->me,$chan)) {
 
-			if ($this->settings[$chan]['joinflood'] == 1 &&
-				!$this->has_flag('p',$nick) && 
-				$this->me != $nick) {
+			if ($this->settings[$chan]['joinflood'] == 1 
+				&& !$this->has_flag('p',$nick) 
+				&& $this->me != $nick) {
 					$this->join_flooders[$chan][count]++;
 					$timer_name = $this->rcrypt($chan."jflood");			
 					if ($this->join_flooders[$chan][count] == $this->settings[$chan]['joinflood_lines']) {
@@ -296,6 +299,9 @@ class Phobos extends Nexus {
 			}
 		}
 		if ($this->me != $nick) {
+			if ($this->ikey_exists($nick,$this->ping_notify)) {
+				
+			} // ping notify check
 			$this->seen_update_record($nick,$host,"joining $chan");		
 		}
 	}
@@ -312,11 +318,11 @@ class Phobos extends Nexus {
 	}	
 	
 	protected function on_kick($nick,$host,$chan,$knick,$reason) {
-		if ($this->settings[$chan]['kickflood'] == 1 &&
-			!$this->has_flag('p',$nick) && 
-			$this->me != $nick &&
-			$this->me != $knick &&
-			$this->isop($this->me,$chan)) {
+		if ($this->settings[$chan]['kickflood'] == 1 
+			&& !$this->has_flag('p',$nick) 
+			&& $this->me != $nick 
+			&& $this->me != $knick 
+			&& $this->isop($this->me,$chan)) {
 				$this->kick_flooders[$chan][$nick][count]++;
 				$timer_name = $this->rcrypt($chan.$nick."kflood");			
 				if ($this->kick_flooders[$chan][$nick][count] == $this->settings[$chan]['kickflood_lines']) {
@@ -366,9 +372,9 @@ class Phobos extends Nexus {
 	
 	// on PUBMSG
 	protected function on_pubmsg($nick,$host,$chan,$text) {
-		if (($this->isop($nick,$chan) && $this->settings[$chan]['ignoreops']) ||
-			($this->isop($nick,$chan,'+') && $this->settings[$chan]['ignorevoices']) ||
-			($this->isop($nick,$chan,'%') && $this->settings[$chan]['ignorehops'])) { 
+		if (($this->isop($nick,$chan) && $this->settings[$chan]['ignoreops']) 
+			|| ($this->isop($nick,$chan,'+') && $this->settings[$chan]['ignorevoices']) 
+			|| ($this->isop($nick,$chan,'%') && $this->settings[$chan]['ignorehops'])) { 
 			$noflood = true; 
 		}
 		
@@ -398,10 +404,10 @@ class Phobos extends Nexus {
 				$this->timer($timer_name,"pub_flooders['$chan']['$nick'][count] = 0",$this->settings[$chan]['pubflood_secs']);
 			}
 		}		
-		if ($text[0] == $this->client['cmd_char'] && 
-			isset($this->ident[$nick]) &&
-			$this->has_flag('c',$nick) &&
-			!$this->is_timer('pub_command_throttle')) {
+		if ($text[0] == $this->client['cmd_char'] 
+			&& isset($this->ident[$nick]) 
+			&& $this->has_flag('c',$nick) 
+			&& !$this->is_timer('pub_command_throttle')) {
 				
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1))-1);
 			
@@ -477,8 +483,8 @@ class Phobos extends Nexus {
 				break;	
 			}
 		}
-		if ($text[0] == $this->client['cmd_char'] &&
-			!$this->is_timer('everyone_command_throttle')) {
+		if ($text[0] == $this->client['cmd_char'] 
+			&& !$this->is_timer('everyone_command_throttle')) {
 				
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1))-1);
 			
@@ -493,14 +499,15 @@ class Phobos extends Nexus {
 						$this->send("PRIVMSG $chan :$nick: please be more specific");
 						$seen_found = true; // skip all other seen checks, dirty but who cares.
 					}
-					if (!$seen_found && $this->me == $tmp_seenwho) {
+					if (!$seen_found && strtolower($this->me) == strtolower($tmp_seenwho)) {
 							$this->send("PRIVMSG $chan :$nick: hi");
 							$seen_found = true;
 					}
 					if (!$seen_found) {
 						foreach ($this->chans as $key => $val) {
-							if ($this->chans[$key][$tmp_seenwho]) {
-								if ($this->client['seen_notifyuser'] == 1 && !isset($this->chans[$chan][$tmp_seenwho])) {
+							if ($this->ikey_exists($tmp_seenwho,$this->chans[$key])) {
+								if ($this->client['seen_notifyuser'] == 1 
+									&& !$this->ikey_exists($tmp_seenwho,$this->chans[$chan])) {
 									$this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan"); 
 									$tmp_usernotified = true;
 								}
@@ -514,6 +521,7 @@ class Phobos extends Nexus {
 						foreach ($this->seen_list as $key => $val) {
 							if ($this->iswm($tmp_seenwho,$key,$strict = false)) {
 								$this->send("PRIVMSG $chan :$nick: last seen $key".($val['host'] ? " (".$val['host'].")":"")." ".$val['action']." ".$this->duration($val['time'])." ago");
+								$this->ping_notify_update_record($key,$nick,$chan)
 								$seen_found = true;
 								break;
 							}
@@ -521,9 +529,43 @@ class Phobos extends Nexus {
 					}
 					if (!$seen_found) {
 						$this->send("PRIVMSG $chan :$nick: i don't know anyone matching '$tmp_seenwho'");
+						if (preg_match("/".$this->regex_nick."/si",$tmp_seenwho)) { 
+							$this->ping_notify_update_record($tmp_seenwho,$nick,$chan);
+						}
 					}
 				break;
 			}
+		}
+		if ($text[0] != $this->client['cmd_char']
+			&& !$this->is_timer('everyone_command_throttle')) {
+			
+			if (preg_match("/^\s*[\w_^`\\{}\[\]|-]+([:;,\s]\s?)+ping/si",$text)
+				&& $this->client['ping_notify'] == 1) {
+				$tmp_usernotified = false;
+				$pingnick_found = false;
+				$pingnick = preg_replace("/^\s*([\w_^`\\{}\[\]|-]+)([:;,\s]\s?)+ping.*$/si","$1",$text);
+				if (strtolower($this->me) == strtolower($pingnick)) {
+					$this->send("PRIVMSG $chan :$nick: pong");
+				}
+				else if (!$this->ikey_exists($pingnick,$this->chans[$chan])) {
+					foreach ($this->chans as $key => $val) {
+						if ($this->ikey_exists($pingnick,$this->chans[$key])) {
+							if ($this->client['seen_notifyuser'] == 1) {
+								$this->send("PRIVMSG $tmp_seenwho :hey $pingnick, $nick ($host) is looking for you in $chan"); 
+								$tmp_usernotified = true;
+							}
+							$this->send("PRIVMSG $chan :$nick: $pingnick is on $key".($tmp_usernotified ? " (user was notified)":"")); 
+							$pingnick_found = true;
+							break;
+						}
+					}
+					if (!$pingnick_found) {
+						if ($this->ping_notify_update_record($pingnick,$nick,$chan)) {
+							$this->send("PRIVMSG $chan :$nick: i will let $pingnick know you were looking for them"); 
+						}
+					}
+				}
+			} // end of ping detection
 		}
 		unset($noflood);
 	}
@@ -609,6 +651,16 @@ class Phobos extends Nexus {
 		$this->seen_list[$nick]['time'] = time();
 		$this->seen_list[$nick]['action'] = $action;
 		$this->disp_msg("updated seen record: $nick ($host) $action");
+	}	
+	
+	protected function ping_notify_update_record($pingnick,$pinger,$chan) {
+		if (sizeof($this->ping_notify[$pingnick]) < $this->max_ping_notify_records
+			&& $this->client['ping_notify'] == 1) {
+			$this->ping_notify[$pingnick][$pinger]['time'] = time();
+			$this->ping_notify[$pingnick][$pinger]['chan'] = $chan;
+			return true;
+		}
+		return false;
 	}
 }
 

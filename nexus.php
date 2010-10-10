@@ -106,6 +106,10 @@ abstract class Nexus {
 	 */
 	private $regex_crypt = "[a-f0-9]{32}";
 	
+	/* this represents a valid IRC nickname
+	 */
+	protected $regex_nick = "^[\w_^`\\{}\[\]|-]+$";
+	
 	/* these are configuration values and what regex to test them against
 	 * used by load_config()
 	 */
@@ -710,6 +714,19 @@ abstract class Nexus {
 		$this->on_unload();
 		exit();
 	}
+	
+	/* return bool if the key exists in an array of keys
+	 * the search is case-insensitive
+	 * 
+	 * @param	string	what key to search for
+	 * @param	array	an array of keys
+	 */	
+	protected function ikey_exists($needle,$haystack) {
+		foreach (array_keys($haystack) as $key => $val) {
+			if (preg_match("/^".$needle."$/si",$key)) { return true; }
+		}
+		return false;
+	} 
 	
 	/* disp_* methods display formatted text to the screen if $verbose allows it
 	 * 
