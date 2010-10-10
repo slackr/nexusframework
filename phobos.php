@@ -551,8 +551,7 @@ class Phobos extends Nexus {
 				break;
 			}
 		}
-		if ($text[0] != $this->client['cmd_char']
-			&& !$this->is_timer('everyone_command_throttle')) {
+		if (!$this->is_timer('everyone_command_throttle')) {
 			
 			$this->timer('everyone_command_throttle',null,3);
 			
