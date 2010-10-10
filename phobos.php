@@ -365,7 +365,7 @@ class Phobos extends Nexus {
 		foreach ($this->chans as $key => $val) {
 			if ($this->me != $nick) {
 				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("part $key\r\njoin $key"); }
-				$this->seen_update_record($nick,$host,"quitting");
+				$this->seen_update_record($nick,$host,"quitting ($reason)");
 			}
 		}	
 	}
@@ -378,11 +378,11 @@ class Phobos extends Nexus {
 			$noflood = true; 
 		}
 		
-		if ($this->settings[$chan]['pubflood'] == 1 &&
-			!$this->has_flag('p',$nick) && 
-			$this->me != $nick && 
-			$this->isop($this->me,$chan) &&
-			!$noflood) {
+		if ($this->settings[$chan]['pubflood'] == 1 
+			&& !$this->has_flag('p',$nick) 
+			&& $this->me != $nick 
+			&& $this->isop($this->me,$chan) 
+			&& !$noflood) {
 				
 			$this->pub_flooders[$chan][$nick][count]++;
 			$timer_name = $this->rcrypt($chan.$nick."pubflood");	
@@ -551,10 +551,10 @@ class Phobos extends Nexus {
 					foreach ($this->chans as $key => $val) {
 						if ($this->ikey_exists($pingnick,$this->chans[$key])) {
 							if ($this->client['seen_notifyuser'] == 1) {
-								$this->send("PRIVMSG $tmp_seenwho :hey $pingnick, $nick ($host) is looking for you in $chan"); 
+								$this->send("PRIVMSG $tmp_seenwho :hey $pingnick, $nick ($host) is pinging you in $chan"); 
 								$tmp_usernotified = true;
 							}
-							$this->send("PRIVMSG $chan :$nick: $pingnick is on $key".($tmp_usernotified ? " (user was notified)":"")); 
+							$this->send("PRIVMSG $chan :$nick: $pingnick is on $key".($tmp_usernotified ? ", your ping was relayed":"")); 
 							$pingnick_found = true;
 							break;
 						}
@@ -658,9 +658,11 @@ class Phobos extends Nexus {
 			&& $this->client['ping_notify'] == 1) {
 			$this->ping_notify[$pingnick][$pinger]['time'] = time();
 			$this->ping_notify[$pingnick][$pinger]['chan'] = $chan;
+			$this->disp_msg("updated ping_notify record: $pinger pinging $pingnick in $chan");
 			return true;
 		}
 		return false;
+		$this->disp_msg("skipped update for ping_notify: $pinger pinging $pingnick in $chan");
 	}
 }
 

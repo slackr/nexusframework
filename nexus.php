@@ -703,6 +703,7 @@ abstract class Nexus {
 	 * @param	string	irc raw data to send
 	 */
 	protected function send($what) {
+		$this->disp_raw("send> $what");
 		fputs($this->sock, $what."\r\n");
 	}
 
@@ -723,7 +724,6 @@ abstract class Nexus {
 	 */	
 	protected function ikey_exists($needle,$haystack) {
 		foreach (array_keys($haystack) as $key) {
-			$this->disp_msg("checking '$needle' =~ '$key'");
 			if (preg_match("/^".$needle."$/si",$key)) { return true; }
 		}
 		return false;
