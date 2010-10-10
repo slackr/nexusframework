@@ -369,7 +369,7 @@ class Phobos extends Nexus {
 					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago),";
 				}
 				$this->send("PRIVMSG $newnick :$newnick: you've been pinged by: ".substr($tmp_pingedby,0,-1));
-				unset($this->ping_notify[$nick]);
+				unset($this->ping_notify[$newnick]);
 			} // ping notify check
 			$this->seen_update_record($nick,$host,"changing nick to $newnick");
 			$this->seen_update_record($newnick,$host,"changing nick from $nick");			
