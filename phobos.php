@@ -302,7 +302,7 @@ class Phobos extends Nexus {
 			if ($this->ikey_exists($nick,$this->ping_notify)
 				&& $this->client['ping_notify'] == 1) {
 				$tmp_pingedby = "";
-				foreach ($this->ping_notify as $key => $val) {
+				foreach ($this->ping_notify[$nick] as $key => $val) {
 					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago),";
 				}
 				$this->send("PRIVMSG $chan :$nick: you've been pinged by: ".substr($tmp_pingedby,0,-1));
@@ -365,7 +365,7 @@ class Phobos extends Nexus {
 			if ($this->ikey_exists($newnick,$this->ping_notify)
 				&& $this->client['ping_notify'] == 1) {
 				$tmp_pingedby = "";
-				foreach ($this->ping_notify as $key => $val) {
+				foreach ($this->ping_notify[$newnick] as $key => $val) {
 					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago),";
 				}
 				$this->send("PRIVMSG $newnick :$newnick: you've been pinged by: ".substr($tmp_pingedby,0,-1));
@@ -553,6 +553,8 @@ class Phobos extends Nexus {
 		}
 		if ($text[0] != $this->client['cmd_char']
 			&& !$this->is_timer('everyone_command_throttle')) {
+			
+			$this->timer('everyone_command_throttle',null,3);
 			
 			if (preg_match("/^\s*[\w_^`\\{}\[\]|-]+([:;,\s]\s?)+ping/si",$text)
 				&& $this->client['ping_notify'] == 1) {
