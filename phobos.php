@@ -303,9 +303,9 @@ class Phobos extends Nexus {
 				&& $this->client['ping_notify'] == 1) {
 				$tmp_pingedby = "";
 				foreach ($this->ping_notify[$nick] as $key => $val) {
-					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago),";
+					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago), ";
 				}
-				$this->send("PRIVMSG $chan :$nick: you've been pinged by: ".substr($tmp_pingedby,0,-1));
+				$this->send("PRIVMSG $chan :$nick: you've been pinged by: ".substr($tmp_pingedby,0,-2));
 				unset($this->ping_notify[$nick]);
 			} // ping notify check
 			$this->seen_update_record($nick,$host,"joining $chan");		
@@ -366,9 +366,9 @@ class Phobos extends Nexus {
 				&& $this->client['ping_notify'] == 1) {
 				$tmp_pingedby = "";
 				foreach ($this->ping_notify[$newnick] as $key => $val) {
-					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago),";
+					$tmp_pingedby .= $key." (in ".$val['chan']." ".$this->duration($val['time'])." ago), ";
 				}
-				$this->send("PRIVMSG $newnick :$newnick: you've been pinged by: ".substr($tmp_pingedby,0,-1));
+				$this->send("PRIVMSG $newnick :$newnick: you've been pinged by: ".substr($tmp_pingedby,0,-2));
 				unset($this->ping_notify[$newnick]);
 			} // ping notify check
 			$this->seen_update_record($nick,$host,"changing nick to $newnick");
