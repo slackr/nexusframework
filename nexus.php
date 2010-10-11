@@ -898,17 +898,19 @@ abstract class Nexus {
 			break;
 			
 			case "KICK":
-				$msg = explode(' ',$this->raw);
-				$not_message = $msg[0].$msg[1].$msg[2].$msg[3];
-				// strlen +5 because of the spaces and :
-				$message = substr($this->raw,strlen($not_message)+5,strlen($this->raw));
+				$reason = ""; $i = 5;
+				while ($tmp_reason_tok = $this->gettok($this->raw,$i)) {
+					$reason .= $tmp_reason_tok;
+				}
+				$reason = substr($reason,1);
+				
 				$nick = ltrim($this->gettok($this->raw,1,'!'),':');
 				$host = $this->gettok($this->gettok($this->raw,1),2,'!');
 				$chan = ltrim($this->gettok($this->raw,3),':');
 				$knick = $this->gettok($this->raw,4);					
 				
-				$this->pre_on_kick($nick,$host,$chan,$knick,$message);
-				$this->on_kick($nick,$host,$chan,$knick,$message);
+				$this->pre_on_kick($nick,$host,$chan,$knick,$reason);
+				$this->on_kick($nick,$host,$chan,$knick,$reason);
 			break;
 			
 			case "MODE":
@@ -927,9 +929,11 @@ abstract class Nexus {
 			case "QUIT":
 				$nick = ltrim($this->gettok($this->raw,1,'!'),':');
 				$host = $this->gettok($this->gettok($this->raw,1),2,'!');
-				$not_reason = $nick.$host;
-				// strlen +5 because of the spaces and :
-				$reason = substr($this->raw,strlen($not_reason)+5,strlen($this->raw));	
+				$reason = ""; $i = 3;
+				while ($tmp_reason_tok = $this->gettok($this->raw,$i)) {
+					$reason .= $tmp_reason_tok;
+				}
+				$reason = substr($reason,1);
 	
 				$this->pre_on_quit($nick,$host,$reason);			
 				$this->on_quit($nick,$host,$reason);
