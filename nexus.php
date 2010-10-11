@@ -898,8 +898,8 @@ abstract class Nexus {
 			break;
 			
 			case "KICK":
-				$reason = ""; $i = 5;
-				while ($tmp_reason_tok = $this->gettok($this->raw,$i)) {
+				$reason = "";
+				for ($i = 5;$tmp_reason_tok = $this->gettok($this->raw,$i);$i++) {
 					$reason .= $tmp_reason_tok;
 				}
 				$reason = substr($reason,1);
@@ -929,8 +929,8 @@ abstract class Nexus {
 			case "QUIT":
 				$nick = ltrim($this->gettok($this->raw,1,'!'),':');
 				$host = $this->gettok($this->gettok($this->raw,1),2,'!');
-				$reason = ""; $i = 3;
-				while ($tmp_reason_tok = $this->gettok($this->raw,$i)) {
+				$reason = "";
+				for ($i = 3;$tmp_reason_tok = $this->gettok($this->raw,$i);$i++) {
 					$reason .= $tmp_reason_tok;
 				}
 				$reason = substr($reason,1);
