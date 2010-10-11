@@ -724,7 +724,7 @@ abstract class Nexus {
 	 */	
 	protected function ikey_exists($needle,$haystack) {
 		foreach (array_keys($haystack) as $key) {
-			if (preg_match("/^".$needle."$/si",$key)) { return true; }
+			if (preg_match("/^".preg_quote($needle)."$/si",$key)) { return true; }
 		}
 		return false;
 	} 
