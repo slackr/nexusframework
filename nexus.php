@@ -900,9 +900,9 @@ abstract class Nexus {
 			case "KICK":
 				$reason = "";
 				for ($i = 5;$tmp_reason_tok = $this->gettok($this->raw,$i);$i++) {
-					$reason .= $tmp_reason_tok;
+					$reason .= $tmp_reason_tok." ";
 				}
-				$reason = substr($reason,1);
+				$reason = substr($reason,1,-1);
 				
 				$nick = ltrim($this->gettok($this->raw,1,'!'),':');
 				$host = $this->gettok($this->gettok($this->raw,1),2,'!');
@@ -931,9 +931,9 @@ abstract class Nexus {
 				$host = $this->gettok($this->gettok($this->raw,1),2,'!');
 				$reason = "";
 				for ($i = 3;$tmp_reason_tok = $this->gettok($this->raw,$i);$i++) {
-					$reason .= $tmp_reason_tok;
+					$reason .= $tmp_reason_tok." ";
 				}
-				$reason = substr($reason,1);
+				$reason = substr($reason,1,-1);
 	
 				$this->pre_on_quit($nick,$host,$reason);			
 				$this->on_quit($nick,$host,$reason);
