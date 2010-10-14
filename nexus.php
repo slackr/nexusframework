@@ -113,11 +113,11 @@ abstract class Nexus {
 	/* these are configuration values and what regex to test them against
 	 * used by load_config()
 	 */
-	protected $config_regex = array("nick" 				=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
-									"ident" 			=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
-									"debug_raw" 		=> '/[01]/si',
-									"join_delay" 		=> '/[0-9]+/si',
-									"keepnick_retry" 	=> '/[0-9]+/si'
+	protected $config_regex = array(	"nick" 				=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
+										"ident" 			=> '/[^\-\d][\^\w-{}\d\`]{1,24}/si',
+										"debug_raw" 		=> '/[01]/si',
+										"join_delay" 		=> '/[0-9]+/si',
+										"keepnick_retry" 	=> '/[0-9]+/si'
 									);
 							
 
@@ -364,7 +364,7 @@ abstract class Nexus {
 			
 		$userfile = $this->client['data_dir'].$this->client['user_file'];
 		if (!$fp = fopen($userfile,"a")) {
-			$this->disp_error("error opening user file (do you need to chmod?): ".$userfile);
+			$this->disp_error("error opening user file: ".$userfile);
 			return false;
 		}
 		$line = $u." ".$h." ".$f." ".$p."\n";
@@ -527,7 +527,7 @@ abstract class Nexus {
 	 * @return	string	will return string if there was an error
 	 */
 	protected function load_config($configfile) {
-		if (!$fp = fopen($configfile,'r')) { return "could not open file (do you need to chmod?): $configfile"; }
+		if (!$fp = fopen($configfile,'r')) { return "could not open file: $configfile"; }
 		$line = 0; $chan = "";
 		while (!feof($fp)) {
 			$line++; $action = ""; $tmp = "";
@@ -647,7 +647,7 @@ abstract class Nexus {
 	 * @return	string	will return string if there was an error		
 	 */	
 	private function load_chanfile($file) {
-		if (!$fp = @fopen($file,'r')) { return "could not open chan file (do you need to chmod?): $file"; }
+		if (!$fp = @fopen($file,'r')) { return "could not open chan file: $file"; }
 		$line = 0; $count = 0;
 		while (!feof($fp)) {
 			$line++;
@@ -1067,8 +1067,8 @@ abstract class Nexus {
 					for ($x = 6; $this->gettok($this->raw,$x); $x++) {
 						$n = str_replace(":","",$this->gettok($this->raw,$x));
 						$strip_op = preg_replace("/^[".$this->status_chars."]/","",$n);
-						$this->chans[$c][$strip_op] = array('host' 		=> '', 
-															'status' 	=> (preg_match("/^[".$this->status_chars."]/",$n) ? substr($n,0,1) : '')
+						$this->chans[$c][$strip_op] = array(	'host' 		=> '', 
+																'status' 	=> (preg_match("/^[".$this->status_chars."]/",$n) ? substr($n,0,1) : '')
 															);
 					}
 			break;	

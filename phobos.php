@@ -103,6 +103,7 @@ class Phobos extends Nexus {
 		$this->seen_list = array();
 		$this->ping_notify = array();
 		$this->max_ping_notify_records = 3;
+		$this->max_ping_notify_age = 2629743;
 		
 		// to make sure the bot does not flood out with too many attempts to regain ops on the same channel
 		$this->regain_ops_completed = array();
@@ -143,7 +144,7 @@ class Phobos extends Nexus {
 			}
 			$line = ""; $count = 0; $skipped = 0;
 			foreach ($this->seen_list as $key => $val) {
-				if ((time() - (int)$val['time']) < 13515200) {
+				if ((time() - (int)$val['time']) < $this->max_ping_notify_age) {
 					$line .= $key." ".($val['host'] ? $val['host'] : "*@*")." ".$val['time']." ".$val['action']."\n";
 					$count++;
 				}
@@ -169,13 +170,13 @@ class Phobos extends Nexus {
 			$line++;
 			$data = rtrim(fgets($fp,512));
 			if ($data) { //don't test blank lines
-				if (!preg_match("/^.+[@].+$/si",$this->gettok($data,2)) 			 ||
-					!preg_match("/^[0-9]+$/si",$this->gettok($data,3))) { 
+				if (!preg_match("/^.+[@].+$/si",$this->gettok($data,2))
+					|| !preg_match("/^[0-9]+$/si",$this->gettok($data,3))) { 
 						$this->disp_msg("warning: skipped invalid record in seen file ($file:$line)");
 						$skipped++;
 				}
-				else if ((time() - $this->gettok($data,3)) > 13515200) {
-					$this->disp_msg("warning: skipped really old record (+6mon) in seen file ($file:$line)");
+				else if ((time() - $this->gettok($data,3)) > $this->max_ping_notify_age) {
+					$this->disp_msg("warning: skipped old record (+".$this->max_ping_notify_age."s) in seen file ($file:$line)");
 					$skipped++;
 				}
 				else {
@@ -255,7 +256,8 @@ class Phobos extends Nexus {
 	// on BAN
 	protected function on_ban($nick,$host,$chan,$mask) {
 		//$this->disp_msg("mode: $nick sets mode $chan +b $mask");
-		if ($this->iswm($mask,$this->me."!".$this->host) && $this->isop($this->me,$chan)) { 
+		if ($this->iswm($mask,$this->me."!".$this->host) 
+			&& $this->isop($this->me,$chan)) { 
 			$this->send("mode $chan -ob $nick $mask");
 		}
 	}
@@ -379,7 +381,7 @@ class Phobos extends Nexus {
 	protected function on_quit($nick,$host,$reason) {
 		foreach ($this->chans as $key => $val) {
 			if ($this->me != $nick) {
-				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("part $key\r\njoin $key"); }
+				if (sizeof($this->chans[$key]) == 1 && !$this->isop($this->me,$key)) { $this->send("PART $key\r\nJOIN $key"); }
 				$this->seen_update_record($nick,$host,"quitting ($reason)");
 			}
 		}	
@@ -440,9 +442,9 @@ class Phobos extends Nexus {
 					if ($this->has_flag('v',$nick)) { $mode = 'v'; }
 					if ($this->has_flag('h',$nick)) { $mode = 'h'; }
 					if ($this->has_flag('o',$nick)) { $mode = 'o'; }
-					if ($mode && 
-						!$this->isop($nick,$chan,$ovh[$mode]) &&
-						$this->isop($this->me,$chan)) { 
+					if ($mode 
+						&& !$this->isop($nick,$chan,$ovh[$mode]) 
+						&& $this->isop($this->me,$chan)) { 
 						
 						$this->cmd_op($chan,$nick,$mode);
 						unset($mode);
@@ -553,14 +555,21 @@ class Phobos extends Nexus {
 		}
 		if (!$this->is_timer('everyone_command_throttle')) {
 			
-			if (preg_match("/^\s*[\w_^`\\{}\[\]|-]+([:;,\s]\s?)+ping/si",$text)
+			if (($tmp_reg_pingmatch = preg_match("/^\s*([\w_^`\\{}\[\]|-]+)([:;,+\s!]\s?)+ping.*$/si",$text) 
+				|| $tmp_reverse_pingmatch = preg_match("/^\s*ping([:;,+\s!]\s?)+([\w_^`\\{}\[\]|-]+).*$/si",$text))
 				&& $this->client['ping_notify'] == 1) {
 			
 				$this->timer('everyone_command_throttle',null,3);
 				
 				$tmp_usernotified = false;
 				$pingnick_found = false;
-				$pingnick = preg_replace("/^\s*([\w_^`\\{}\[\]|-]+)([:;,\s]\s?)+ping.*$/si","$1",$text);
+				if ($tmp_reg_pingmatch > 0) { 
+					$pingnick = preg_replace("/^\s*([\w_^`\\{}\[\]|-]+)([:;,+\s!]\s?)+ping.*$/si","$1",$text); 
+				}
+				else if ($tmp_reverse_pingmatch > 0) {
+					$pingnick = preg_replace("/^\s*ping([:;,+\s!]\s?)+([\w_^`\\{}\[\]|-]+).*$/si","$2",$text); 
+				}
+				
 				if (strtolower($this->me) == strtolower($pingnick)) {
 					$this->send("PRIVMSG $chan :$nick: pong");
 				}
@@ -590,8 +599,8 @@ class Phobos extends Nexus {
 	// on PRIVMSG
 	protected function on_privmsg($nick,$host,$text) {
 		// user is sending us a command
-		if ($text[0] == $this->client['cmd_char'] &&
-			isset($this->ident[$nick])) {			
+		if ($text[0] == $this->client['cmd_char'] 
+			&& isset($this->ident[$nick])) {			
 			$cmd = substr($this->gettok($text,1),1,strlen($this->gettok($text,1)));
 			switch ($cmd) {				
 				case "+chan":
