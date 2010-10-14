@@ -555,7 +555,7 @@ class Phobos extends Nexus {
 		}
 		if (!$this->is_timer('everyone_command_throttle')) {
 			
-			if ((($tmp_reg_pingmatch = preg_match('/^\s*([\w_^`\\{}\[\]|-]+)([:;,+\s!]\s?)+ping.*$/si',$text)) > 0
+			if (  (($tmp_reg_pingmatch = preg_match('/^\s*([\w_^`\\{}\[\]|-]+)([:;,+\s!]\s?)+ping.*$/si',$text)) > 0
 				|| ($tmp_reverse_pingmatch = preg_match('/^\s*ping([:;,+\s!]\s?)+([\w_^`\\{}\[\]|-]+).*$/si',$text)) > 0)
 				&& $this->client['ping_notify'] == 1) {
 			
@@ -565,11 +565,9 @@ class Phobos extends Nexus {
 				$pingnick_found = false;
 				if ($tmp_reg_pingmatch > 0) { 
 					$pingnick = preg_replace('/^\s*([\w_^`\\{}\[\]|-]+)([:;,+\s!]\s?)+ping.*$/si',"$1",$text); 
-					$this->disp_msg("detected regular match, result = '$pingnick', from '$text'");
 				}
 				else if ($tmp_reverse_pingmatch > 0) { 
 					$pingnick = preg_replace('/^\s*ping([:;,+\s!]\s?)+([\w_^`\\{}\[\]|-]+).*$/si',"$2",$text); 
-					$this->disp_msg("detected reverse match, result = '$pingnick', from '$text'");
 				}
 				
 				if (strtolower($this->me) == strtolower($pingnick)) {
