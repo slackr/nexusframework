@@ -226,7 +226,8 @@ abstract class Nexus {
                     pcntl_signal(SIGINT, array($this,'bye'));       
                     pcntl_signal(SIGHUP, array($this,'bye'));
                                         
-                    if (function_exists("pcntl_fork") && function_exists("posix_setsid"))){
+                    if (function_exists("pcntl_fork")
+                        && function_exists("posix_setsid"))){
                         $this->fork_possible = true;
                     }
                 }
