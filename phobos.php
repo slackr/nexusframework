@@ -31,7 +31,7 @@
  *  we just have to check for $this->ident[irc_nickname]
  */
 
-require 'nexus.php';
+require 'nexus.php';  
 
 class Phobos extends Nexus {
     protected function on_load() {
@@ -417,7 +417,7 @@ class Phobos extends Nexus {
             }
         }
         if ($text[0] == $this->client['cmd_char'] && isset($this->ident[$nick]) && $this->has_flag('c', $nick) && !$this->is_timer('pub_command_throttle')) {
-            $cmd = substr($this->gettok($text, 1), 1, strlen($this->gettok($text, 1)) - 1);
+            $cmd = substr($this->gettok($text, 1), 1);
             
             $this->timer('pub_command_throttle', null, 3);
             
@@ -497,7 +497,7 @@ class Phobos extends Nexus {
             }
         }
         if ($text[0] == $this->client['cmd_char'] && !$this->is_timer('everyone_command_throttle')) {
-            $cmd = substr($this->gettok($text, 1), 1, strlen($this->gettok($text, 1)) - 1);
+            $cmd = substr($this->gettok($text, 1), 1);
             
             $this->timer('everyone_command_throttle', null, 3);
             
@@ -587,7 +587,7 @@ class Phobos extends Nexus {
     protected function on_privmsg($nick, $host, $text) {
         // user is sending us a command
         if ($text[0] == $this->client['cmd_char'] && isset($this->ident[$nick])) {
-            $cmd = substr($this->gettok($text, 1), 1, strlen($this->gettok($text, 1)));
+            $cmd = substr($this->gettok($text, 1), 1);
             switch ($cmd) {
                 case "+chan":
                     if ($this->has_flag('j', $nick)) {

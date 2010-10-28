@@ -1215,7 +1215,7 @@ abstract class Nexus {
                 }
                 $bnick = $this->me;
                 $bnick = (strlen($bnick) < 9 && !$this->alt_nick_tries ? $bnick : substr($bnick, 0, strlen($bnick) - 1)) . $this->alt_nick_tries;
-                
+
                 $this->me = $bnick;
                 $this->send("NICK " . $bnick);
                 $this->disp_msg("nickname " . $this->keepnick . " in use, trying: " . $bnick);
@@ -1551,7 +1551,7 @@ abstract class Nexus {
     // on PRIVMSG
     private function pre_on_privmsg($nick, $host, $text) {
         if (!$this->is_timer('priv_command_throttle') && ($text[0] == $this->client['cmd_char']) && !isset($this->ident[$nick])) {
-            $cmd = substr($this->gettok($text, 1), 1, strlen($this->gettok($text, 1)));
+            $cmd = substr($this->gettok($text, 1), 1);
             $this->timer('priv_command_throttle', null, 10);
             switch ($cmd) {
                 case ($cmd == "ident" || $cmd == "verify" || $cmd == "login"):
