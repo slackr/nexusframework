@@ -520,7 +520,7 @@ class Phobos extends Nexus {
             $this->disp_msg("cmd: $cmd");
             $this->timer('everyone_command_throttle', null, 3);
             
-            switch ($cmd) {
+            switch (true) {
                 case ($cmd == "seen"):
                     $this->disp_msg("in switch cmd: $cmd");
                     if ($this->client['seen'] == 1) {
