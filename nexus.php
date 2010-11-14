@@ -1553,7 +1553,7 @@ abstract class Nexus {
         if (!$this->is_timer('priv_command_throttle') && ($text[0] == $this->client['cmd_char']) && !isset($this->ident[$nick])) {
             $cmd = substr($this->gettok($text, 1), 1);
             $this->timer('priv_command_throttle', null, 10);
-            switch ($cmd) {
+            switch (true) {
                 case ($cmd == "ident" || $cmd == "verify" || $cmd == "login"):
                     $usr  = $this->gettok($text, 2);
                     $pass = $this->gettok($text, 3);

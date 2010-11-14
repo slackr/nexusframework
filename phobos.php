@@ -439,7 +439,7 @@ class Phobos extends Nexus {
             
             $this->timer('pub_command_throttle', null, 3);
             
-            switch ($cmd) {
+            switch (true) {
                 case ($cmd == "uptime"):
                     $this->send("PRIVMSG $chan :up " . $this->duration($this->uptime));
                     break;
