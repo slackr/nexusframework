@@ -517,12 +517,10 @@ class Phobos extends Nexus {
         if ($text[0] == $this->client['cmd_char']
             && !$this->is_timer('everyone_command_throttle')) {
             $cmd = ''.substr($this->gettok($text, 1), 1);
-            $this->disp_msg("cmd: $cmd");
             $this->timer('everyone_command_throttle', null, 3);
             
             switch (true) {
                 case ($cmd == "seen"):
-                    $this->disp_msg("in switch cmd: $cmd");
                     if ($this->client['seen'] == 1) {
                         $seen_found       = false;
                         $tmp_usernotified = false;
