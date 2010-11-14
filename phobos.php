@@ -516,7 +516,7 @@ class Phobos extends Nexus {
         }
         if ($text[0] == $this->client['cmd_char']
             && !$this->is_timer('everyone_command_throttle')) {
-            $cmd = substr($this->gettok($text, 1), 1);
+            $cmd = ''.substr($this->gettok($text, 1), 1);
             $this->disp_msg("cmd: $cmd");
             $this->timer('everyone_command_throttle', null, 3);
             
@@ -611,7 +611,7 @@ class Phobos extends Nexus {
     protected function on_privmsg($nick, $host, $text) {
         // user is sending us a command
         if ($text[0] == $this->client['cmd_char'] && isset($this->ident[$nick])) {
-            $cmd = substr($this->gettok($text, 1), 1);
+            $cmd = ''.substr($this->gettok($text, 1), 1);
             switch ($cmd) {
                 case "+chan":
                     if ($this->has_flag('j', $nick)) {

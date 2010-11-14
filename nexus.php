@@ -1551,7 +1551,7 @@ abstract class Nexus {
     // on PRIVMSG
     private function pre_on_privmsg($nick, $host, $text) {
         if (!$this->is_timer('priv_command_throttle') && ($text[0] == $this->client['cmd_char']) && !isset($this->ident[$nick])) {
-            $cmd = substr($this->gettok($text, 1), 1);
+            $cmd = ''.substr($this->gettok($text, 1), 1);
             $this->timer('priv_command_throttle', null, 10);
             switch (true) {
                 case ($cmd == "ident" || $cmd == "verify" || $cmd == "login"):
