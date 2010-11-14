@@ -435,7 +435,7 @@ class Phobos extends Nexus {
             }
         }
         if ($text[0] == $this->client['cmd_char'] && isset($this->ident[$nick]) && $this->has_flag('c', $nick) && !$this->is_timer('pub_command_throttle')) {
-            $cmd = substr($this->gettok($text, 1), 1);
+            $cmd = ''.substr($this->gettok($text, 1), 1);
             
             $this->timer('pub_command_throttle', null, 3);
             
