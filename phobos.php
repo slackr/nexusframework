@@ -518,11 +518,11 @@ class Phobos extends Nexus {
             && !$this->is_timer('everyone_command_throttle')) {
             $cmd = substr($this->gettok($text, 1), 1);
             $this->disp_msg("cmd: $cmd");
-            
             $this->timer('everyone_command_throttle', null, 3);
             
             switch ($cmd) {
                 case ($cmd == "seen"):
+                    $this->disp_msg("in switch cmd: $cmd");
                     if ($this->client['seen'] == 1) {
                         $seen_found       = false;
                         $tmp_usernotified = false;
@@ -531,45 +531,42 @@ class Phobos extends Nexus {
                             $this->send("PRIVMSG $chan :$nick: please be more specific");
                             break;
                         }
-                        
-                        if (strtolower($this->me) == strtolower($tmp_seenwho)) {
+                        if (!$seen_found && strtolower($this->me) == strtolower($tmp_seenwho)) {
                             $this->send("PRIVMSG $chan :$nick: hi");
                             break;
                         }
-                        
-                        # keep looking...
-                        foreach ($this->chans as $key => $val) {
-                            if ($this->ikey_exists($tmp_seenwho, $this->chans[$key])) {
-                                if ($this->client['seen_notifyuser'] == 1
-                                    && !$this->ikey_exists($tmp_seenwho, $this->chans[$chan])) {
-                                    $this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan");
-                                    $tmp_usernotified = true;
+                        if (!$seen_found) {
+                            foreach ($this->chans as $key => $val) {
+                                if ($this->ikey_exists($tmp_seenwho, $this->chans[$key])) {
+                                    if ($this->client['seen_notifyuser'] == 1
+                                        && !$this->ikey_exists($tmp_seenwho, $this->chans[$chan])) {
+                                        $this->send("PRIVMSG $tmp_seenwho :hey $tmp_seenwho, $nick ($host) is looking for you in $chan");
+                                        $tmp_usernotified = true;
+                                    }
+                                    $this->send("PRIVMSG $chan :$nick: $tmp_seenwho is on $key" . ($tmp_usernotified ? " (user was notified)" : ""));
+                                    $seen_found = true;
+                                    break;
                                 }
-                                $this->send("PRIVMSG $chan :$nick: $tmp_seenwho is on $key" . ($tmp_usernotified ? " (user was notified)" : ""));
-                                break;
                             }
                         }
-                        
-                        # keep looking...
-                        foreach ($this->seen_list as $key => $val) {
-                            if ($this->iswm($tmp_seenwho, $key, $strict = false)) {
-                                $this->send("PRIVMSG $chan :$nick: last seen $key" . ($val['host'] ? " (" . $val['host'] . ")" : "") . " " . $val['action'] . " " . $this->duration($val['time']) . " ago");
-                                $this->ping_notify_update_record($key, $nick, $chan);
-                                $seen_found = true;
-                                break;
+                        if (!$seen_found) {
+                            foreach ($this->seen_list as $key => $val) {
+                                if ($this->iswm($tmp_seenwho, $key, $strict = false)) {
+                                    $this->send("PRIVMSG $chan :$nick: last seen $key" . ($val['host'] ? " (" . $val['host'] . ")" : "") . " " . $val['action'] . " " . $this->duration($val['time']) . " ago");
+                                    $this->ping_notify_update_record($key, $nick, $chan);
+                                    $seen_found = true;
+                                    break;
+                                }
                             }
                         }
-                        
-                        # still nothing? inform the user
-                        $this->send("PRIVMSG $chan :$nick: i don't know anyone matching '$tmp_seenwho'");
-                        if (preg_match("/" . $this->regex_nick . "/si", $tmp_seenwho)) {
-                            $this->ping_notify_update_record($tmp_seenwho, $nick, $chan);
+                        if (!$seen_found) {
+                            $this->send("PRIVMSG $chan :$nick: i don't know anyone matching '$tmp_seenwho'");
+                            if (preg_match("/" . $this->regex_nick . "/si", $tmp_seenwho)) {
+                                $this->ping_notify_update_record($tmp_seenwho, $nick, $chan);
+                            }
                         }
-                            
                     }
                     break;
-                default:
-                break;
             }
         }
         if (!$this->is_timer('everyone_command_throttle')) {
