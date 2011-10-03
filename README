@@ -41,14 +41,15 @@
 	Nexus requires that PHP-CLI (version 5.x or higher) be available on the machine running it. 
 	Nexus will run on any platform that PHP5 runs on, however a Unix environment is recommended.
 
-	The Nexus IRC Framework was created by blindk@efnet 
+	The Nexus IRC Framework was created by adrianp@freenode 
 
       2. HOW TO GET NEXUS
 
 	o Download
 
-		The Nexus IRC Framework can be downloaded from the SourceForge project page:
-		http://sourceforge.net/projects/nexusframework/
+		The Nexus IRC Framework can be downloaded from GitHub or Slacknet:
+			GitHub: https://github.com/slackr/nexusframework
+			Slacknet: http://git.slacknet.ca/nexusframework.git
 
 		Each release includes a version of the Phobos IRC client, created with Nexus.
 
